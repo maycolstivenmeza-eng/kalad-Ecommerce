@@ -1,4 +1,4 @@
-<div class="coleccion-container">
+﻿<div class="coleccion-container">
 
   <!-- ===== BREADCRUMB ===== -->
   <div class="breadcrumb">
@@ -14,20 +14,20 @@
 
   <div class="filtro" (click)="toggle(0)">
     <span>Ordenar por</span>
-    <span class="flecha" [class.open]="open[0]">⌄</span>
+    <span class="flecha" [class.open]="open[0]">�O"</span>
   </div>
 
   <div class="filtro" (click)="toggle(1)">
     <span>Talla</span>
-    <span class="flecha" [class.open]="open[1]">⌄</span>
+    <span class="flecha" [class.open]="open[1]">�O"</span>
   </div>
 
   <div class="filtro" (click)="toggle(2)">
     <span>Color</span>
-    <span class="flecha" [class.open]="open[2]">⌄</span>
+    <span class="flecha" [class.open]="open[2]">�O"</span>
   </div>
 
-  <!-- ❗ SOLO UNA LÍNEA DESPUÉS DEL ÚLTIMO FILTRO -->
+  <!-- �?- SOLO UNA L�?NEA DESPU�%S DEL �sLTIMO FILTRO -->
   <div class="linea-unica"></div>
 
   <div class="categoria">Bolsas</div>
@@ -52,30 +52,31 @@
       <div class="ordenar-right">
         <span>Ordenar por:</span>
         <span class="az">A-Z</span>
-        <span class="arrow small">⌄</span>
+        <span class="arrow small">�O"</span>
       </div>
 
       <!-- ===== GRID PRODUCTOS ===== -->
-      <div class="grid-productos">
+      <div class="product-grid">
+        <article class="product-card" *ngFor="let p of productos" [attr.data-id]="p.id">
+          <a class="thumb" [routerLink]="['/products', p.id]">
+            <span class="badge" *ngIf="p.badge" [ngClass]="p.badge">
+              {{ p.badge }}
+            </span>
+            <img class="img primary" [src]="p.imagen" [alt]="p.nombre" />
+            <img class="img hover" *ngIf="p.imagenes && p.imagenes.length > 0" [src]="p.imagenes[0]" [alt]="p.nombre" />
+          </a>
 
-        <div class="card-producto" *ngFor="let p of productos">
-          <div class="img-wrapper">
-            <img [src]="p.imagen" />
-            <span class="fav">♡</span>
-          </div>
+          <a class="title" [routerLink]="['/products', p.id]">
+            {{ p.nombre }}
+          </a>
 
-          <div class="info">
-            <div class="left">
-              <h3>{{ p.nombre }}</h3>
-              <p>{{ p.precio  }}</p>
-            </div>
-
-            <button class="btn-cart">
-              🛒
+          <div class="price-row">
+            <span class="price">{{ p.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <button class="cart-btn" type="button">
+              <span class="cart-icon" aria-hidden="true">�Y>'</span>
             </button>
           </div>
-        </div>
-
+        </article>
       </div>
 
     </div>

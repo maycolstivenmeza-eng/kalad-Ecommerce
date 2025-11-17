@@ -3,11 +3,14 @@ export interface Product {
   nombre: string;
   precio: number;
   imagen: string;
+  imagenes?: string[];    // ← NUEVO: Otras imágenes
   descripcion: string;
   categoria: string;
   coleccion: string;
-  colores: string[];
+  colores?: string[];
+  color?: string;
   stock: number;
+  fechaCreacion?: string | Date;
   caracteristicas?: string;
   dimensiones?: {
     alto: string;
@@ -16,4 +19,5 @@ export interface Product {
     capacidad: string;
   };
   badge?: 'Nuevo' | 'Oferta' | 'Limitada' | null;
+  Etiqueta?: string | null;
 }

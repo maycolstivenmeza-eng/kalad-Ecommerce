@@ -1,21 +1,43 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../shared/services/product.service';
 import { Product } from '../../shared/models/product.model';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './products.component.html',
   styleUrl: './products.component.css'
 })
 export class ProductsComponent implements OnInit {
+
+  // ======== Datos desde Firebase ========
   products: Product[] = [];
-  filteredProducts: Product[] = [];
-  sortOrder: string = 'A-Z';
-  loading: boolean = true;
+  productosFiltrados: Product[] = [];
+
+  // ======== Ordenamiento ========
+  orden: 'az' | 'za' | 'priceAsc' | 'priceDesc' | 'new' = 'az';
+
+  // ======== Filtros ========
+  filtroCategoria: string = '';
+  filtroTalla: string = '';
+  filtroColor: string = '';
+
+  // ======== Valores del sidebar ========
+  tallas: string[] = ['S', 'M', 'L', 'XL'];
+  
+  colores = [
+    { id: 'beige', label: 'Beige', hex: '#d8c8a8' },
+    { id: 'cafe', label: 'Café', hex: '#6a4e3a' },
+    { id: 'negro', label: 'Negro', hex: '#000' },
+    { id: 'arena', label: 'Arena', hex: '#e8e0c8' }
+  ];
+
+  categorias = ['Mochilas', 'Bolsas', 'Morrales', 'Zapatos'];
+
+  loading = true;
   error: string | null = null;
 
   constructor(
@@ -27,6 +49,9 @@ export class ProductsComponent implements OnInit {
     this.loadProducts();
   }
 
+  // =======================
+  //      CARGAR DATA
+  // =======================
   loadProducts(): void {
     this.loading = true;
     this.error = null;
@@ -34,53 +59,107 @@ export class ProductsComponent implements OnInit {
     this.productService.getAllProducts().subscribe({
       next: (products) => {
         this.products = products;
-        this.filteredProducts = [...products];
-        this.sortProducts();
+        this.productosFiltrados = [...products];
+        this.aplicarFiltros();
         this.loading = false;
       },
       error: (err) => {
         console.error('Error al cargar productos:', err);
-        this.error = 'Error al cargar los productos. Por favor, intenta de nuevo.';
+        this.error = 'Error al cargar los productos.';
         this.loading = false;
       }
     });
   }
 
-  sortProducts(): void {
-    switch (this.sortOrder) {
-      case 'A-Z':
-        this.filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
-        break;
-      case 'Z-A':
-        this.filteredProducts.sort((a, b) => b.nombre.localeCompare(a.nombre));
-        break;
-      case 'Precio: Menor a Mayor':
-        this.filteredProducts.sort((a, b) => a.precio - b.precio);
-        break;
-      case 'Precio: Mayor a Menor':
-        this.filteredProducts.sort((a, b) => b.precio - a.precio);
-        break;
+  // =======================
+  //      ORDENAR
+  // =======================
+  onOrderChange(order: any) {
+    this.orden = order;
+    this.aplicarFiltros();
+  }
+
+  private ordenarLista(lista: Product[]) {
+    switch (this.orden) {
+      case 'az':
+        return lista.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      case 'za':
+        return lista.sort((a, b) => b.nombre.localeCompare(a.nombre));
+      case 'priceAsc':
+        return lista.sort((a, b) => a.precio - b.precio);
+      case 'priceDesc':
+        return lista.sort((a, b) => b.precio - a.precio);
+      case 'new':
+        return lista.sort((a, b) => {
+          const dateA = a.fechaCreacion ? new Date(a.fechaCreacion).getTime() : 0;
+          const dateB = b.fechaCreacion ? new Date(b.fechaCreacion).getTime() : 0;
+          return dateB - dateA;
+        });
+      default:
+        return lista;
     }
   }
 
-  changeSortOrder(): void {
-    const orders = ['A-Z', 'Z-A', 'Precio: Menor a Mayor', 'Precio: Mayor a Menor'];
-    const currentIndex = orders.indexOf(this.sortOrder);
-    this.sortOrder = orders[(currentIndex + 1) % orders.length];
-    this.sortProducts();
+  // =======================
+  //      APLICAR FILTROS
+  // =======================
+  aplicarFiltros() {
+    let lista = [...this.products];
+
+    // FILTRO CATEGORÍA
+    if (this.filtroCategoria) {
+      lista = lista.filter((p) => p.categoria === this.filtroCategoria);
+    }
+
+    // FILTRO COLOR (si el producto trae colores)
+    if (this.filtroColor) {
+      lista = lista.filter((p) => p.colores?.includes(this.filtroColor));
+    }
+
+    // FILTRO TALLA (si existiera más adelante)
+    if (this.filtroTalla) {
+      // por ahora no se usa porque tus mochilas no manejan tallas
+    }
+
+    // ORDENAMIENTO
+    lista = this.ordenarLista(lista);
+
+    this.productosFiltrados = lista;
   }
 
+  // =======================
+  //    SETTERS DE FILTROS
+  // =======================
+  setFiltroCategoria(categoria: string) {
+    this.filtroCategoria = categoria;
+    this.aplicarFiltros();
+  }
+
+  setFiltroTalla(talla: string) {
+    this.filtroTalla = talla;
+    this.aplicarFiltros();
+  }
+
+  setFiltroColor(color: string) {
+    this.filtroColor = color;
+    this.aplicarFiltros();
+  }
+
+  // =======================
+  //  Ver detalles del producto
+  // =======================
   viewProductDetails(productId: string): void {
     this.router.navigate(['/products', productId]);
   }
 
-  addToCart(product: Product, event: Event): void {
-    event.stopPropagation();
-    // TODO: Implementar lógica de carrito
-    console.log('Producto agregado al carrito:', product);
+  // =======================
+  //  Carrito (prueba)
+  // =======================
+  addToCart(product: Product) {
     alert(`${product.nombre} agregado al carrito`);
   }
 
+  // Formatear precio
   formatPrice(price: number): string {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',

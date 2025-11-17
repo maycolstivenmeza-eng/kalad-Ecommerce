@@ -14,6 +14,8 @@ import { Product } from '../../shared/models/product.model';
 export class HomePageComponent implements OnInit {
   featuredProducts: Product[] = [];
   loading: boolean = true;
+  private placeholderImage = 'assets/images/Producto_1.jpg';
+  imageLoaded: Record<string, boolean> = {};
 
   constructor(
     private productService: ProductService,
@@ -58,5 +60,23 @@ export class HomePageComponent implements OnInit {
       currency: 'COP',
       minimumFractionDigits: 0
     }).format(price);
+  }
+
+  onImageLoad(productId: string) {
+    this.imageLoaded[productId] = true;
+  }
+
+  onImageError(productId: string, event: Event) {
+    const target = event.target as HTMLImageElement | null;
+    if (target && !target.src.includes(this.placeholderImage)) {
+      target.src = this.placeholderImage;
+    }
+    this.imageLoaded[productId] = true;
+  }
+
+  resolveImage(product: Product): string {
+    return product.imagen && product.imagen.trim().length > 0
+      ? product.imagen
+      : this.placeholderImage;
   }
 }

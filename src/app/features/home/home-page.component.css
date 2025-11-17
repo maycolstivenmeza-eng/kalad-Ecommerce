@@ -1,4 +1,4 @@
-/* === RESET === */
+﻿/* === RESET === */
 * {
   margin: 0;
   padding: 0;
@@ -99,7 +99,7 @@ body {
 }
 
 .btn-hero {
-  cursor: pointer; /* 👈 Esto activa la manito */
+  cursor: pointer; /* ðŸ‘ˆ Esto activa la manito */
 }
 
 .catalogo {
@@ -136,30 +136,18 @@ body {
 }
 
 .section-divider i {
-  color: #cb5e30; /* fuego naranja cálido */
+  color: #cb5e30; /* fuego naranja cÃ¡lido */
   margin-right: 6px;
 }
 
 
-/* Opcionales por tipo */
-.badge.nuevo {
-  background-color: #7DCEA0;
-}
-.badge.oferta {
-  background-color: #F1948A;
-}
-.badge.edición {
-  background-color: #85C1E9;
-}
-
-.grid {
+/* Grid de productos destacados */
+.product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 30px;
-  justify-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 26px 22px;
   padding: 40px 0;
-  max-width: 1100px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 /* === TARJETA DE PRODUCTO === */
@@ -169,15 +157,13 @@ body {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   text-align: left;
-  font-family: "Playfair Display", serif;
-  font-weight: 600;
+  font-family: "Quicksand", sans-serif;
+  padding-bottom: 12px;
   transition: transform 0.3s ease;
-  padding-bottom: 15px;
 }
 
 .product-card:hover {
-  transform: translateY(-5px);
-  transition: all 0.3s ease;
+  transform: translateY(-4px);
 }
 
 /* === CONTENEDOR DE IMAGEN CON SHIMMER === */
@@ -231,14 +217,14 @@ body {
   opacity: 1;
 }
 
-/* Apagar el shimmer cuando la imagen está cargada */
+/* Apagar el shimmer cuando la imagen estÃ¡ cargada */
 .product-card img.loaded ~ .img-wrapper::before,
 .product-card img.loaded + .img-wrapper::before,
 .product-card .img-wrapper.loaded::before {
   display: none !important;
 }
 
-/* Versión correcta: detectar que el contenedor tiene imagen cargada */
+/* VersiÃ³n correcta: detectar que el contenedor tiene imagen cargada */
 .product-card .img-wrapper.loaded::before {
   display: none !important;
 }
@@ -266,7 +252,7 @@ body {
   background-color: #1E88E5;
 }
 
-/* Título del producto */
+/* TÃ­tulo del producto */
 .product-card h3 {
    font-family: "Playfair Display", serif;
   font-size: 1.1rem;         /* antes 0.9 o 1rem */
@@ -291,7 +277,7 @@ body {
   margin-top: 4px;
 }
 
-/* Botón carrito */
+/* BotÃ³n carrito */
 .product-card .btn-carrito {
   border: 1px solid #3b2c20;
   border-radius: 20px;
@@ -304,14 +290,14 @@ body {
 }
 
 .product-card .btn-carrito:hover {
-    background-color: #3b2c20;   /* cambia el fondo al café de marca */
-  color: #fff;                 /* el ícono o texto pasa a blanco */
+    background-color: #3b2c20;   /* cambia el fondo al cafÃ© de marca */
+  color: #fff;                 /* el Ã­cono o texto pasa a blanco */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
 
-/* === SECCIÓN HISTORIA === */
+/* === SECCIÃ“N HISTORIA === */
 .historia-section {
   display: flex;
   align-items: center;
@@ -357,7 +343,7 @@ body {
 }
 
 .historia-section button {
-  background-color: #3B2C20; /* tono café marca */
+  background-color: #3B2C20; /* tono cafÃ© marca */
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -373,7 +359,7 @@ body {
   transform: translateY(-3px);
 }
 
-/* === SECCIÓN RAÍCES IGUAL A LA MAQUETA === */
+/* === SECCIÃ“N RAÃCES IGUAL A LA MAQUETA === */
 .raices-section {
   background-color: #f1ede5;
   padding: 80px 100px;
@@ -394,13 +380,13 @@ body {
   margin: 0 auto;
   display: flex;
   justify-content: center; /* centra horizontalmente */
-  gap: 60px; /* más espacio entre las dos tarjetas */
+  gap: 60px; /* mÃ¡s espacio entre las dos tarjetas */
   flex-wrap: wrap;
 }
 
 .raiz-item {
   flex: 1 1 calc(50% - 60px); /* antes 33.33% */
-  max-width: 400px; /* un poco más ancho para balancear visualmente */
+  max-width: 400px; /* un poco mÃ¡s ancho para balancear visualmente */
   display: flex;
   flex-direction: column;
   align-items: center; /* centramos contenido */
@@ -433,7 +419,7 @@ body {
 
 .raiz-item .link {
   font-family: "Quicksand", sans-serif;
-  color: #946037; /* tono dorado/marrón cálido */
+  color: #946037; /* tono dorado/marrÃ³n cÃ¡lido */
   font-size: 0.95rem;
   text-decoration: none;
   transition: color 0.3s ease;
@@ -459,7 +445,7 @@ body {
 
 .testimonios-container {
   display: flex;
-  justify-content: space-between; /* Cambiado para que se distribuya como las imágenes */
+  justify-content: space-between; /* Cambiado para que se distribuya como las imÃ¡genes */
   align-items: stretch;
   gap: 30px;
   max-width: 1140px; /* Igual que .raices-grid */
@@ -489,7 +475,7 @@ body {
 }
 
 
-/* ===== FOOTER - ya puedes tenerlo pero lo incluyo por si lo quieres en este archivo también ===== */
+/* ===== FOOTER - ya puedes tenerlo pero lo incluyo por si lo quieres en este archivo tambiÃ©n ===== */
 
 footer {
   background-color: #5D4524;
@@ -616,7 +602,7 @@ body.modal-open { overflow: hidden; }
   border-radius: 3px;
 }
 
-/* Botón cerrar (X) */
+/* BotÃ³n cerrar (X) */
 .cerrar {
   position: absolute;
   top: 10px;
@@ -631,7 +617,7 @@ body.modal-open { overflow: hidden; }
   color: #CB5E30;
 }
 
-/* === Título del modal === */
+/* === TÃ­tulo del modal === */
 .modal-contenido h2 {
   font-size: 20px;
   font-weight: 700;
@@ -680,7 +666,7 @@ body.modal-open { overflow: hidden; }
   color: #666;
 }
 
-/* === BOTÓN ELIMINAR PRODUCTO === */
+/* === BOTÃ“N ELIMINAR PRODUCTO === */
 .btn-eliminar {
   position: absolute;
   right: 0;
@@ -699,7 +685,7 @@ body.modal-open { overflow: hidden; }
   color: #A84D24;
 }
 
-/* === CUPÓN === */
+/* === CUPÃ“N === */
 .cupon {
   margin-top: 20px;
   border-top: 1px solid #eee;
@@ -765,7 +751,7 @@ body.modal-open { overflow: hidden; }
   color: #3b2c20;
 }
 
-/* === BOTÓN PAGAR === */
+/* === BOTÃ“N PAGAR === */
 .btn-pagar {
   width: 100%;
   margin-top: 20px;
@@ -793,7 +779,7 @@ body.modal-open { overflow: hidden; }
   }
 }
 
-/* Animación de entrada */
+/* AnimaciÃ³n de entrada */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -824,3 +810,103 @@ body.modal-open { overflow: hidden; }
 }
 
 
+
+
+
+/* Ajuste: replicar dimensiones del catálogo principal */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 26px 22px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.product-grid .product-card {
+  font-family: "Quicksand", sans-serif;
+  padding-bottom: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+}
+
+.product-grid .thumb {
+  position: relative;
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.product-grid .badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.product-grid .img {
+  width: 100%;
+  height: 265px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  opacity: 1;
+}
+
+.product-grid .img.hover {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.product-grid .thumb:hover .img.primary {
+  transform: scale(1.03);
+  opacity: 0;
+}
+
+.product-grid .thumb:hover .img.hover {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.product-grid .title {
+  display: block;
+  margin: 12px 12px 6px;
+  color: #3B2C20;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.product-grid .price-row {
+  margin: 0 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-grid .price {
+  font-family: "Quicksand", sans-serif;
+  font-weight: 700;
+  color: #5C4B3B;
+}
+
+.product-grid .cart-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid #e6e1d9;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.product-grid .cart-btn:hover {
+  border-color: #3b2c20;
+}

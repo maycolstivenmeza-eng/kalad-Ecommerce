@@ -1,111 +1,155 @@
-<section class="products-layout">
-  <aside class="filters-panel">
-    <div class="filters-card">
-      <p class="filters-label">Ordenar por</p>
-      <ul>
-        <li class="active">Relevancia</li>
-        <li>Novedades</li>
-        <li>Mejor valorados</li>
-        <li>Precio</li>
-      </ul>
-    </div>
+<!-- CONTENEDOR GENERAL -->
+<section class="products-page">
 
-    <div class="filters-card">
-      <p class="filters-label">Categorías</p>
-      <ul>
-        <li>Bolsos</li>
-        <li>Hogar</li>
-        <li>Ilustraciones</li>
-        <li>Accesorios</li>
-        <li>Temporada</li>
-      </ul>
-    </div>
+  <!-- Breadcrumb (opcional) -->
+  <nav class="breadcrumb">
+    <a routerLink="/home">Inicio</a>
+    <span>/</span>
+    <span>Productos</span>
+  </nav>
 
-    <div class="filters-card">
-      <p class="filters-label">Colecciones</p>
-      <ul>
-        <li>Kalad Básico</li>
-        <li>Edición Especial</li>
-        <li>Marítima</li>
-        <li>Flor de Agua</li>
-      </ul>
-    </div>
+  <div class="layout">
 
-    <div class="filters-card tags">
-      <p class="filters-label">Materiales</p>
-      <div class="tags-cloud">
-        <button>Algodón</button>
-        <button>Lino</button>
-        <button>Bordado</button>
-        <button>Orgánico</button>
-        <button>Edición limitada</button>
-      </div>
-    </div>
-  </aside>
+    <!-- ======= SIDEBAR/FILTROS ======= -->
+    <aside class="sidebar">
 
-  <div class="products-column">
-    <header class="products-header">
-      <div>
-        <p class="eyebrow">Colección Kalad</p>
-        <h1>Productos</h1>
-        <p class="subtitle">{{ filteredProducts.length }} artículos disponibles para envío inmediato</p>
-      </div>
-      <div class="sort-control">
-        <label>Ordenar por</label>
-        <button (click)="changeSortOrder()">
-          {{ sortOrder }}
-          <i class="fa-solid fa-angle-down"></i>
+      <!-- Ordenar por (versión de sidebar colapsable) -->
+      <div class="filter-block">
+        <button class="filter-title" type="button">
+          Ordenar por
+          <span class="caret">▾</span>
         </button>
+        <div class="filter-content">
+          <ul class="order-list">
+            <li (click)="onOrderChange('az')" [class.active]="orden==='az'">A-Z</li>
+            <li (click)="onOrderChange('za')" [class.active]="orden==='za'">Z-A</li>
+            <li (click)="onOrderChange('priceAsc')" [class.active]="orden==='priceAsc'">Precio: bajo → alto</li>
+            <li (click)="onOrderChange('priceDesc')" [class.active]="orden==='priceDesc'">Precio: alto → bajo</li>
+            <li (click)="onOrderChange('new')" [class.active]="orden==='new'">Nuevos</li>
+          </ul>
+        </div>
       </div>
-    </header>
 
-    <div class="products-body">
-      @if (loading) {
-        <div class="state-card">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-          <p>Cargando productos...</p>
+      <!-- Talla -->
+      <div class="filter-block">
+        <button class="filter-title" type="button">
+          Talla
+          <span class="caret">▾</span>
+        </button>
+        <div class="filter-content">
+          <div class="chip-group">
+            <button class="chip" 
+                    *ngFor="let t of tallas" 
+                    [class.active]="filtroTalla===t"
+                    (click)="setFiltroTalla(t)">{{ t }}</button>
+          </div>
         </div>
-      } @else if (error) {
-        <div class="state-card error">
-          <i class="fa-solid fa-exclamation-circle"></i>
-          <p>{{ error }}</p>
-          <button (click)="loadProducts()">Reintentar</button>
-        </div>
-      } @else {
-        <div class="productos-grid">
-          @for (product of filteredProducts; track product.id) {
-            <article class="product-card" (click)="viewProductDetails(product.id)">
-              <div class="img-wrapper" [class.loaded]="true">
-                <img [src]="product.imagen" [alt]="product.nombre" class="loaded" />
-              </div>
-              <p class="product-category">Bolso</p>
-              <h3>{{ product.nombre }}</h3>
-              <div class="price-row">
-                <span class="price">{{ formatPrice(product.precio) }}</span>
-                <button class="btn-carrito" (click)="addToCart(product, $event)">
-                  <i class="fa-solid fa-cart-shopping"></i>
-                </button>
-              </div>
-            </article>
-          } @empty {
-            <p style="text-align: center; color: #666; padding: 40px;">No hay productos disponibles</p>
-          }
-        </div>
-      }
-    </div>
+      </div>
 
-    <div class="pagination">
-      <button class="arrow" disabled>
-        <i class="fa-solid fa-angle-left"></i>
-      </button>
-      <button class="page active">1</button>
-      <button class="page">2</button>
-      <button class="page">3</button>
-      <span>...</span>
-      <button class="page">12</button>
-      <button class="arrow">
-        <i class="fa-solid fa-angle-right"></i>
-      </button>
-    </div>
+      <!-- Color -->
+      <div class="filter-block">
+        <button class="filter-title" type="button">
+          Color
+          <span class="caret">▾</span>
+        </button>
+        <div class="filter-content">
+          <div class="color-pills">
+            <button class="color-pill" 
+                    *ngFor="let c of colores"
+                    [style.--color]="c.hex"
+                    [class.active]="filtroColor===c.id"
+                    (click)="setFiltroColor(c.id)"
+                    [attr.aria-label]="c.label">
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categorías -->
+      <div class="filter-block">
+        <div class="filter-title static">Categorías</div>
+        <ul class="category-list">
+          <li>
+            <button class="link" [class.active]="filtroCategoria==='Bolsas'" (click)="setFiltroCategoria('Bolsas')">Bolsas</button>
+          </li>
+          <li>
+            <button class="link" [class.active]="filtroCategoria==='Mochilas'" (click)="setFiltroCategoria('Mochilas')">Mochilas</button>
+          </li>
+          <li>
+            <button class="link" [class.active]="filtroCategoria==='Morrales'" (click)="setFiltroCategoria('Morrales')">Morrales</button>
+          </li>
+          <li>
+            <button class="link" [class.active]="filtroCategoria==='Zapatos'" (click)="setFiltroCategoria('Zapatos')">Zapatos</button>
+          </li>
+        </ul>
+      </div>
+
+    </aside>
+
+    <!-- ======= CONTENIDO PRINCIPAL ======= -->
+    <main class="content">
+
+      <!-- Barra superior de orden global (derecha) -->
+      <div class="topbar">
+        <div class="order-inline">
+          <span>Ordenar por:</span>
+          <div class="order-inline-select">
+            <button class="inline-option" [class.active]="orden==='az'" (click)="onOrderChange('az')">A-Z</button>
+            <button class="inline-option" [class.active]="orden==='za'" (click)="onOrderChange('za')">Z-A</button>
+            <button class="inline-option" [class.active]="orden==='priceAsc'" (click)="onOrderChange('priceAsc')">Precio ↑</button>
+            <button class="inline-option" [class.active]="orden==='priceDesc'" (click)="onOrderChange('priceDesc')">Precio ↓</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRID DE PRODUCTOS -->
+      <div class="product-grid">
+
+        <!-- Card de producto -->
+        <article class="product-card" *ngFor="let p of productosFiltrados" [attr.data-id]="p.id">
+          <a class="thumb" [routerLink]="['/products', p.id]">
+            <span class="badge" *ngIf="p.badge" [ngClass]="p.badge">
+              {{ p.badge }}
+            </span>
+            <!-- Imagen principal -->
+            <img class="img primary" [src]="p.imagen" [alt]="p.nombre" />
+            <!-- Imagen secundaria (si existe) para hover -->
+            <img
+              class="img hover"
+              *ngIf="p.imagenes && p.imagenes.length > 0"
+              [src]="p.imagenes[0]"
+              [alt]="p.nombre"
+            />
+          </a>
+
+          <a class="title" [routerLink]="['/products', p.id]">
+            {{ p.nombre }}
+          </a>
+
+          <div class="price-row">
+            <span class="price">{{ p.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+
+            <button class="cart-btn" type="button" (click)="addToCart(p)">
+              <span class="cart-icon" aria-hidden="true">🛒</span>
+            </button>
+          </div>
+        </article>
+
+        <!-- Sin resultados -->
+        <div class="no-results" *ngIf="productosFiltrados?.length === 0">
+          No se encontraron productos con los filtros seleccionados.
+        </div>
+
+      </div>
+
+      <!-- (opcional) Paginación o “Cargar más” -->
+      <!--
+      <div class="load-more" *ngIf="puedeCargarMas">
+        <button class="btn-more" (click)="cargarMas()">Cargar más</button>
+      </div>
+      -->
+
+    </main>
+
   </div>
 </section>

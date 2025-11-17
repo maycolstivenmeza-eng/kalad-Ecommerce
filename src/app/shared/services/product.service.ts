@@ -10,9 +10,12 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy
+  orderBy,
+  runTransaction,
+  increment
 } from '@angular/fire/firestore';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Product } from '../models/product.model';
 import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
 
@@ -21,157 +24,237 @@ import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage
 })
 export class ProductService {
   private readonly COLLECTION_NAME = 'productos';
+  private readonly badgeValues: Exclude<Product['badge'], null>[] = ['Nuevo', 'Oferta', 'Limitada'];
 
- constructor(
-  private firestore: Firestore,
-  private storage: Storage
-) {}
+  constructor(
+    private firestore: Firestore,
+    private storage: Storage
+  ) {}
 
+  /** Acceso centralizado a la colección */
+  private colRef() {
+    return collection(this.firestore, this.COLLECTION_NAME);
+  }
+
+  /** Ref a un documento específico */
+  private docRef(id: string) {
+    return doc(this.firestore, `${this.COLLECTION_NAME}/${id}`);
+  }
 
   /**
    * Obtiene todos los productos
    */
   getAllProducts(): Observable<Product[]> {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    return collectionData(productsCollection, { idField: 'id' }) as Observable<Product[]>;
+    return this.mapCollection(collectionData(this.colRef(), { idField: 'id' }));
   }
 
   /**
    * Obtiene un producto por su ID
    */
   getProductById(id: string): Observable<Product> {
-    const productDoc = doc(this.firestore, `${this.COLLECTION_NAME}/${id}`);
-    return docData(productDoc, { idField: 'id' }) as Observable<Product>;
+    return this.mapDocument(docData(this.docRef(id), { idField: 'id' }));
   }
 
   /**
    * Obtiene productos por categoría
    */
   getProductsByCategory(categoria: string): Observable<Product[]> {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    const q = query(
-      productsCollection,
+    const qy = query(
+      this.colRef(),
       where('categoria', '==', categoria),
       orderBy('nombre', 'asc')
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
+    return this.mapCollection(collectionData(qy, { idField: 'id' }));
   }
 
   /**
    * Obtiene productos por colección
    */
   getProductsByCollection(coleccion: string): Observable<Product[]> {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    const q = query(
-      productsCollection,
+    const qy = query(
+      this.colRef(),
       where('coleccion', '==', coleccion),
       orderBy('nombre', 'asc')
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
+    return this.mapCollection(collectionData(qy, { idField: 'id' }));
   }
 
   /**
    * Obtiene productos destacados (con badge)
+   * Nota: usar 'in' evita resultados inconsistentes de '!= null'
    */
   getFeaturedProducts(): Observable<Product[]> {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    const q = query(
-      productsCollection,
-      where('badge', '!=', null),
-      orderBy('badge', 'asc')
+    return this.getAllProducts().pipe(
+      map((products) =>
+        products.filter((p) => !!p.badge && this.badgeValues.includes(p.badge as Exclude<Product['badge'], null>))
+      )
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
   }
 
   /**
    * Obtiene productos con stock disponible
    */
   getProductsInStock(): Observable<Product[]> {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    const q = query(
-      productsCollection,
+    const qy = query(
+      this.colRef(),
       where('stock', '>', 0),
       orderBy('stock', 'desc')
     );
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
+    return this.mapCollection(collectionData(qy, { idField: 'id' }));
   }
 
   /**
-   * Busca productos por nombre (búsqueda simple)
-   * Nota: Para búsquedas más avanzadas, considera usar Algolia o similar
+   * Búsqueda simple por nombre (cliente)
+   * (Firestore no soporta contains; se deja así por ahora)
    */
-  searchProducts(searchTerm: string): Observable<Product[]> {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    // Esta es una búsqueda básica. Para búsquedas avanzadas usar servicios externos
-    return collectionData(productsCollection, { idField: 'id' }) as Observable<Product[]>;
+  searchProducts(_searchTerm: string): Observable<Product[]> {
+    return this.getAllProducts();
   }
 
   /**
    * Crea un nuevo producto
-   * Solo para administradores
    */
   async createProduct(product: Omit<Product, 'id'>) {
-    const productsCollection = collection(this.firestore, this.COLLECTION_NAME);
-    return await addDoc(productsCollection, product);
+    return await addDoc(this.colRef(), this.prepareWritePayload(product));
   }
 
   /**
    * Actualiza un producto existente
-   * Solo para administradores
    */
   async updateProduct(id: string, product: Partial<Product>): Promise<void> {
-    const productDoc = doc(this.firestore, `${this.COLLECTION_NAME}/${id}`);
-    return await updateDoc(productDoc, { ...product });
+    return await updateDoc(this.docRef(id), this.prepareWritePayload(product));
   }
 
   /**
    * Elimina un producto
-   * Solo para administradores
    */
   async deleteProduct(id: string): Promise<void> {
-    const productDoc = doc(this.firestore, `${this.COLLECTION_NAME}/${id}`);
-    return await deleteDoc(productDoc);
+    return await deleteDoc(this.docRef(id));
   }
 
   /**
-   * Actualiza el stock de un producto
+   * Actualiza el stock de un producto (set absoluto)
    */
   async updateStock(id: string, newStock: number): Promise<void> {
-    const productDoc = doc(this.firestore, `${this.COLLECTION_NAME}/${id}`);
-    return await updateDoc(productDoc, { stock: newStock });
+    return await updateDoc(this.docRef(id), { stock: newStock });
   }
 
   /**
-   * Reduce el stock después de una compra
+   * Reduce el stock de forma atómica (transacción)
    */
   async reduceStock(id: string, quantity: number): Promise<void> {
-    const productDoc = doc(this.firestore, `${this.COLLECTION_NAME}/${id}`);
-    const product = await firstValueFrom(this.getProductById(id));
+    await runTransaction(this.firestore, async (trx: { get: (arg0: any) => any; update: (arg0: any, arg1: { stock: any; }) => void; }) => {
+      const snap = await trx.get(this.docRef(id));
+      if (!snap.exists()) throw new Error('Producto no existe');
 
-    if (product && product.stock >= quantity) {
-      const newStock = product.stock - quantity;
-      return await updateDoc(productDoc, { stock: newStock });
-    } else {
-      throw new Error('Stock insuficiente');
-    }
+      const data = snap.data() as Product;
+      const current = Number(data.stock ?? 0);
+
+      if (current < quantity) throw new Error('Stock insuficiente');
+
+      trx.update(this.docRef(id), { stock: increment(-quantity) });
+    });
   }
 
-// -----------------------------------------------------------------------------------
-// SUBIR IMAGEN A FIREBASE STORAGE
-// -----------------------------------------------------------------------------------
-async subirImagen(file: File): Promise<string> {
-  const ruta = `productos/${Date.now()}_${file.name}`;
-  
-  const storageRef = ref(this.storage, ruta);
+  // -----------------------------------------------------------------------------------
+  // SUBIR IMAGEN A FIREBASE STORAGE
+  // -----------------------------------------------------------------------------------
+  async subirImagen(file: File): Promise<string> {
+    const safeName = file.name.replace(/\s+/g, '_');
+    const ruta = `productos/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
+    const storageRef = ref(this.storage, ruta);
 
-  // Sube archivo
-  await uploadBytes(storageRef, file);
+    // Puedes agregar metadata si quieres:
+    // const metadata = { contentType: file.type };
+    await uploadBytes(storageRef, file /*, metadata*/);
 
-  // Obtiene URL pública
-  return await getDownloadURL(storageRef);
+    return await getDownloadURL(storageRef);
+  }
+
+  // -----------------------------------------------------------------------------------
+  // Helpers para normalizar datos
+  // -----------------------------------------------------------------------------------
+  private mapCollection(source: Observable<any[]>): Observable<Product[]> {
+    return source.pipe(map((items) => items.map((item) => this.normalizeProduct(item))));
+  }
+
+  private mapDocument(source: Observable<any>): Observable<Product> {
+    return source.pipe(map((item) => this.normalizeProduct(item)));
+  }
+
+  private normalizeProduct(raw: any): Product {
+    if (!raw) {
+      return raw as Product;
+    }
+
+    const colores = this.sanitizeStringArray(
+      Array.isArray(raw.colores) ? raw.colores : raw.color ? [raw.color] : []
+    );
+
+    const imagenes = this.sanitizeStringArray(
+      Array.isArray(raw.imagenes) ? raw.imagenes : raw.imagenes ? [raw.imagenes] : []
+    );
+
+    const rawBadge = raw.badge ?? raw.Etiqueta ?? raw.etiqueta ?? null;
+    const badge =
+      rawBadge && this.badgeValues.includes(rawBadge as Exclude<Product['badge'], null>)
+        ? (rawBadge as Product['badge'])
+        : null;
+
+    return {
+      ...raw,
+      id: raw.id,
+      nombre: raw.nombre ?? '',
+      precio: Number(raw.precio ?? 0),
+      imagen: raw.imagen ?? '',
+      imagenes,
+      descripcion: raw.descripcion ?? '',
+      categoria: raw.categoria ?? '',
+      coleccion: raw.coleccion ?? '',
+      colores,
+      color: raw.color ?? colores[0] ?? '',
+      stock: Number(raw.stock ?? 0),
+      badge,
+      Etiqueta: badge,
+    };
+  }
+
+  private prepareWritePayload(product: Partial<Product>) {
+    const colores = this.sanitizeStringArray(Array.isArray(product.colores) ? product.colores : []);
+    const imagenes = this.sanitizeStringArray(Array.isArray(product.imagenes) ? product.imagenes : []);
+    const rawBadge = product.badge ?? null;
+    const badge =
+      rawBadge && this.badgeValues.includes(rawBadge as Exclude<Product['badge'], null>)
+        ? rawBadge
+        : null;
+    const color = product.color ?? colores[0] ?? '';
+
+    const payload: Record<string, any> = {
+      ...product,
+      colores,
+      imagenes,
+      badge,
+      Etiqueta: badge,
+      color: color || null,
+    };
+
+    if ('id' in payload) {
+      delete payload['id'];
+    }
+    return this.cleanUndefined(payload);
+  }
+
+  private sanitizeStringArray(values: any[]): string[] {
+    return values
+      .map((value) => (typeof value === 'string' ? value : value != null ? String(value) : ''))
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+  }
+
+  private cleanUndefined(obj: Record<string, any>) {
+    Object.keys(obj).forEach((key) => {
+      if (obj[key] === undefined) delete obj[key];
+    });
+    return obj;
+  }
 }
-
-
-}
-
-

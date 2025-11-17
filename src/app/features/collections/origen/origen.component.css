@@ -113,65 +113,112 @@
   font-size: 13px;
 }
 
-/* ========= GRID PRODUCTOS ========== */
-.grid-productos {
+/* ========= GRID PRODUCTOS (alineado con productos generales) ========== */
+.product-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 45px;
+  gap: 26px 22px;
 }
 
-.card-producto {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+.product-card {}
 
-.img-wrapper {
+.thumb {
+  display: block;
   position: relative;
-  height: 360px;
   overflow: hidden;
   border-radius: 10px;
 }
 
-.img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.fav {
+.badge {
   position: absolute;
-  right: 12px;
-  top: 12px;
-  font-size: 22px;
-  cursor: pointer;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* ===== info producto ===== */
-.info {
+.badge.Nuevo {
+  background-color: #4CAF50;
+}
+
+.badge.Oferta {
+  background-color: #E53935;
+}
+
+.badge.Limitada {
+  background-color: #1E88E5;
+}
+
+.img {
+  width: 100%;
+  height: 265px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.img.hover {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.thumb:hover .img.primary {
+  transform: scale(1.03);
+  opacity: 0;
+}
+
+.thumb:hover .img.hover {
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.title {
+  display: block;
+  margin-top: 10px;
+  color: #3b2c20;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.title:hover {
+  text-decoration: underline;
+}
+
+.price-row {
+  margin-top: 8px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
 }
 
-.left h3 {
-  margin: 0;
-  font-size: 20px;
-  font-family: "Playfair Display", serif;
+.price {
+  font-weight: 700;
+  color: #3b2c20;
+  font-size: 14px;
 }
 
-.left p {
-  margin: 0;
-  font-size: 20px;
-}
-
-/* ===== Botón carrito ===== */
-.btn-cart {
-  width: 48px;
-  height: 30px;
-  border: 1px solid #8a8a8a;
-  border-radius: 50px;
-  background: transparent;
-  font-size: 16px;
+.cart-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #e6e1d9;
+  background: #fff;
+  display: grid;
+  place-items: center;
   cursor: pointer;
+}
+
+.cart-btn:hover {
+  border-color: #3b2c20;
+}
+
+.cart-icon {
+  font-size: 13px;
 }

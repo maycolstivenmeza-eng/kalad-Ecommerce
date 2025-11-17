@@ -20,22 +20,43 @@
             <p style="margin-top: 10px;">Cargando productos...</p>
         </div>
     } @else if (featuredProducts.length > 0) {
-        <div class="grid">
+        <div class="product-grid">
             @for (product of featuredProducts; track product.id) {
-                <div class="product-card" (click)="viewProductDetails(product.id)">
-                    <div class="img-wrapper">
-                        @if (product.badge) {
-                            <div class="badge" [class]="'badge-' + product.badge.toLowerCase()">
-                                {{ product.badge }}
-                            </div>
-                        }
-                        <img [src]="product.imagen" [alt]="product.nombre">
-                    </div>
-                    <h3>{{ product.nombre }}</h3>
-                    <div class="price-cart">
+                <article class="product-card" [attr.data-id]="product.id">
+                    <a class="thumb" [routerLink]="['/products', product.id]">
+                        <span class="badge" *ngIf="product.badge" [ngClass]="product.badge">
+                            {{ product.badge }}
+                        </span>
+                        <img
+                          class="img primary"
+                          [src]="resolveImage(product)"
+                          [alt]="product.nombre"
+                          (load)="onImageLoad(product.id)"
+                          (error)="onImageError(product.id, $event)"
+                        />
+                        <img
+                          class="img hover"
+                          *ngIf="product.imagenes && product.imagenes.length > 0"
+                          [src]="product.imagenes[0]"
+                          [alt]="product.nombre"
+                        />
+                    </a>
+
+                    <a class="title" [routerLink]="['/products', product.id]">
+                        {{ product.nombre }}
+                    </a>
+
+                    <div class="price-row">
                         <span class="price">{{ formatPrice(product.precio) }}</span>
+                        <button
+                          class="cart-btn"
+                          type="button"
+                          (click)="viewProductDetails(product.id); $event.stopPropagation()"
+                        >
+                            <span class="cart-icon" aria-hidden="true">�Y>'</span>
+                        </button>
                     </div>
-                </div>
+                </article>
             }
         </div>
     } @else {

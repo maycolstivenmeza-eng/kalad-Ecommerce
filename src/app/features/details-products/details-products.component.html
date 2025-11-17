@@ -1,145 +1,140 @@
-﻿@if (product) {
-  <div class="product-detail">
-    <nav class="breadcrumb">
-      <a routerLink="/">Inicio</a>
-      <span>/</span>
-      <a routerLink="/products">Productos</a>
-      <span>/</span>
-      <span>{{ product.nombre }}</span>
-    </nav>
+﻿<section class="product-page" *ngIf="product as p">
 
-    <section class="product-grid">
-      <div class="gallery">
-        <div class="thumbnails">
-          @for (thumb of thumbnailImages; track $index) {
-            <button
-              type="button"
-              class="thumbnail"
-              [class.active]="selectedImage === thumb"
-              (click)="selectImage(thumb)"
-              [attr.aria-label]="'Ver imagen ' + ($index + 1)"
-            >
-              <img [src]="thumb" [alt]="product.nombre + ' vista ' + ($index + 1)">
-            </button>
-          }
-        </div>
-        <div class="main-image">
-          <img [src]="selectedImage" [alt]="product.nombre" loading="lazy">
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb">
+    <a routerLink="/">Inicio</a> /
+    <a routerLink="/products">Productos</a> /
+    <span>{{ p.nombre }}</span>
+  </nav>
+
+  <!-- ===================== CONTENEDOR GENERAL ====================== -->
+  <div class="product-container">
+
+    <!-- ===== THUMBNAILS ===== -->
+    <aside class="gallery">
+      <div
+        class="thumb"
+        *ngFor="let img of thumbnailImages; let i = index"
+        [class.active]="selectedImage === img"
+        (click)="selectImage(img)"
+      >
+        <img [src]="img" />
+      </div>
+    </aside>
+
+    <!-- ===== IMAGEN PRINCIPAL ===== -->
+    <div class="main-image">
+      <img [src]="selectedImage" />
+    </div>
+
+    <!-- ===== INFORMACIÓN ===== -->
+    <div class="info">
+
+      <div class="badge" *ngIf="p.badge" [ngClass]="p.badge">{{ p.badge }}</div>
+      <h1 class="title">{{ p.nombre }}</h1>
+
+      <p class="price">{{ formatPrice(p.precio) }}</p>
+
+      <!-- COLOR -->
+      <div class="color-section">
+        <p class="subtitle">Color</p>
+
+        <div class="colors">
+          <div
+            class="color-circle"
+            *ngFor="let c of (p.colores || [])"
+            [style.background]="c"
+            [class.selected]="selectedColor === c"
+            (click)="selectColor(c)"
+          ></div>
         </div>
       </div>
 
-      <div class="info-panel">
-        <p class="eyebrow">{{ product.coleccion }}</p>
-        <h1>{{ product.nombre }}</h1>
-        <p class="price">{{ formatPrice(product.precio) }}</p>
-        <p class="payment-note">Impuestos incluidos &middot; Env&iacute;o gratis en Colombia</p>
+      <!-- CANTIDAD -->
+      <div class="qty-section">
+        <p class="subtitle">Cantidad</p>
 
-        <div class="color-picker">
-          <div class="picker-header">
-            <p>Color</p>
-            <span>{{ selectedColor }}</span>
-          </div>
-          <div class="color-list">
-            @for (color of product.colores; track color) {
-              <button
-                type="button"
-                class="color-chip"
-                [class.selected]="selectedColor === color"
-                (click)="selectColor(color)"
-                [style.--chip-color]="color"
-                [attr.aria-label]="'Color ' + color"
-              >
-                <span class="swatch"></span>
-              </button>
-            }
-          </div>
+        <div class="qty-box">
+          <button (click)="decrement()">−</button>
+
+          <input
+            type="number"
+            [(ngModel)]="quantity"
+            min="1"
+            [max]="p.stock || 99"
+          />
+
+          <button (click)="increment()">+</button>
         </div>
-
-        <div class="quantity-block">
-          <p>Cantidad</p>
-          <div class="quantity-selector">
-            <button type="button" (click)="decrement()" aria-label="Disminuir cantidad">&#8722;</button>
-            <span>{{ quantity }}</span>
-            <button type="button" (click)="increment()" aria-label="Aumentar cantidad">+</button>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="button" class="btn primary" (click)="buyNow()">Comprar Ahora</button>
-          <button type="button" class="btn secondary" (click)="addToCart()">Agregar al Carrito</button>
-        </div>
-
-        <button type="button" class="favorite-link">&#9825; A&ntilde;adir a favoritos</button>
       </div>
-    </section>
 
-    <section class="description-section">
-      <article class="rich-copy">
-        <h2>Descripci&oacute;n</h2>
-        <p>
-          La {{ product.nombre }} es una pieza artesanal unica que captura la esencia del mar y la suavidad de los tonos naturales.
-          Confeccionada a mano con materiales locales de alta calidad, esta bolsa combina un dise&ntilde;o elegante y fresco,
-          ideal para acompa&ntilde;arte en tus dias de playa, paseos casuales o actividades cotidianas.
-        </p>
-        <p>
-          Cada hilo ha sido tejido a mano por artesanas expertas, resaltando la autenticidad y la calidad del trabajo artesanal.
-          El interior esta forrado con una tela ligera y fresca que protege tus objetos personales, mientras que los detalles
-          reforzados aseguran una experiencia comoda y segura en cada uso.
-        </p>
+      <!-- BOTONES -->
+      <button class="btn-buy" (click)="buyNow()">Comprar Ahora</button>
 
-        <h3>Caracteristicas</h3>
-        <p>
-          La Bolsa Beige de Mar esta elaborada con fibras naturales provenientes de materiales locales que garantizan resistencia y durabilidad
-          sin perder la suavidad al tacto. Cada pieza incluye detalles en cuerda y acabados reforzados que elevan la experiencia diaria.
-        </p>
-      </article>
+      <button class="btn-cart" (click)="addToCart()">Agregar al Carrito</button>
 
-      <aside class="dimensions">
-        <h3>Dimensiones</h3>
-        <dl>
-          <div>
-            <dt>Alto</dt>
-            <dd>{{ displayDimensions?.alto }}</dd>
-          </div>
-          <div>
-            <dt>Ancho</dt>
-            <dd>{{ displayDimensions?.ancho }}</dd>
-          </div>
-          <div>
-            <dt>Profundidad</dt>
-            <dd>{{ displayDimensions?.profundidad }}</dd>
-          </div>
-          <div>
-            <dt>Capacidad</dt>
-            <dd>{{ displayDimensions?.capacidad }}</dd>
-          </div>
-        </dl>
-      </aside>
-    </section>
+      <button class="favorite-btn">♡ Añadir a favoritos</button>
 
-    <section class="reviews-panel">
-      <h2>Opiniones de los Clientes</h2>
-      <div class="reviews">
-        @for (review of reviews; track review.name) {
-          <article class="review">
-            <div class="review-header">
-              <p class="review-name">{{ review.name }}</p>
-              <p class="review-date">{{ review.date }}</p>
-            </div>
-            <div class="stars">
-              @for (star of stars; track $index) {
-                <span [class.filled]="$index < review.rating">&#9733;</span>
-              }
-            </div>
-            <p class="review-comment">{{ review.comment }}</p>
-          </article>
-        }
-      </div>
-    </section>
+    </div>
   </div>
-} @else {
-  <div class="loading-state">
-    <i class="fas fa-spinner fa-spin"></i>
-    <p>Cargando producto...</p>
-  </div>
-}
+
+  <!-- ===================== DESCRIPCIÓN ====================== -->
+  <section class="description">
+    <h2>Descripción</h2>
+    <p>
+      {{ p.descripcion }}
+    </p>
+  </section>
+
+  <!-- ===================== CARACTERÍSTICAS ====================== -->
+  <section class="features">
+    <h2>Características</h2>
+
+    <p>
+      La {{ p.nombre }} está elaborada con materiales artesanales locales de alta calidad.
+      Cada pieza es trabajada a mano por artesanas colombianas, brindando un diseño elegante,
+      fresco y duradero ideal para tus actividades diarias.
+    </p>
+  </section>
+
+  <!-- ===================== DIMENSIONES ====================== -->
+  <section class="dimensions">
+    <h2>Dimensiones</h2>
+
+    <table>
+      <tr>
+        <td>Alto</td>
+        <td class="value">{{ displayDimensions?.alto }}</td>
+      </tr>
+      <tr>
+        <td>Ancho</td>
+        <td class="value">{{ displayDimensions?.ancho }}</td>
+      </tr>
+      <tr>
+        <td>Profundidad</td>
+        <td class="value">{{ displayDimensions?.profundidad }}</td>
+      </tr>
+      <tr>
+        <td>Capacidad</td>
+        <td class="value">{{ displayDimensions?.capacidad }}</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ===================== OPINIONES ====================== -->
+  <section class="reviews">
+    <h2>Opiniones de los Clientes</h2>
+
+    <div class="review" *ngFor="let r of reviews">
+      <p class="review-name">{{ r.name }}</p>
+      <p class="review-date">{{ r.date }}</p>
+
+      <div class="stars">
+        <span *ngFor="let s of stars; let i = index">
+          {{ i < r.rating ? '★' : '☆' }}
+        </span>
+      </div>
+
+      <p class="review-comment">{{ r.comment }}</p>
+    </div>
+  </section>

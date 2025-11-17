@@ -1,29 +1,44 @@
-import { Component } from '@angular/core';
-import { collection, Firestore, getDocs } from '@angular/fire/firestore';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { Product } from '../../../shared/models/product.model';
+import { ProductService } from '../../../shared/services/product.service';
 
 @Component({
   selector: 'app-origen',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, RouterLink],
   templateUrl: './origen.component.html',
   styleUrl: './origen.component.css'
 })
-export class OrigenComponent {
-  productos: any[] = [];
+export class OrigenComponent implements OnInit, OnDestroy {
+  productos: Product[] = [];
   filtros = { ordenar: false, talla: false, color: false };
+  private sub?: Subscription;
 
-  constructor(private firestore: Firestore) {}
+  constructor(private productService: ProductService) {}
 
   async ngOnInit() {
-    await this.obtenerProductos();
+    this.sub = this.productService
+      .getProductsByCollection('kalad-origen')
+      .subscribe((items) => {
+        this.productos = [...items];
+      });
   }
 
-  async obtenerProductos() {
-   
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   toggleFiltro(tipo: string) {
-  
+    if (tipo === 'ordenar') {
+      this.filtros.ordenar = !this.filtros.ordenar;
+    } else if (tipo === 'talla') {
+      this.filtros.talla = !this.filtros.talla;
+    } else if (tipo === 'color') {
+      this.filtros.color = !this.filtros.color;
+    }
   }
 
   ordenar(metodo: string) {
@@ -40,7 +55,7 @@ export class OrigenComponent {
   open = [false, false, false];
 
   toggle(i: number) {
-  this.open[i] = !this.open[i];
+    this.open[i] = !this.open[i];
   }
 
 
