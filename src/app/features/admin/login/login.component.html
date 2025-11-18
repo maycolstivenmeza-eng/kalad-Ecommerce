@@ -1,0 +1,21 @@
+<div class="login-container">
+
+  <h2>Acceso Administrador</h2>
+
+  <form (ngSubmit)="login()" #form="ngForm">
+
+    <label>Email</label>
+    <input type="email" [(ngModel)]="email" name="email" required class="input"/>
+
+    <label>Contraseña</label>
+    <input type="password" [(ngModel)]="password" name="password" required class="input"/>
+
+    <p class="error" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+    <button class="btn-login" type="submit" [disabled]="loading || form.invalid">
+      {{ loading ? 'Accediendo…' : 'Ingresar' }}
+    </button>
+
+  </form>
+
+</div>

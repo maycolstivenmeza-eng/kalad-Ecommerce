@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-
+import { adminAuthGuard } from './shared/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -27,20 +27,28 @@ export const routes: Routes = [
     path: 'collections/origen',
     loadComponent: () => import('./features/collections/origen/origen.component').then(m => m.OrigenComponent)
   },
- {
+  {
     path: 'collections/essencia',
     loadComponent: () => import('./features/collections/essencia/essencia.component').then(m => m.EssenciaComponent)
   },
-
-// ✅ NUEVA RUTA ADMIN
+  {
+    path: 'admin',
+    redirectTo: 'admin/login',
+    pathMatch: 'full'
+  },
+  {
+    path: 'admin/login',
+    loadComponent: () =>
+      import('./features/admin/login/login.component')
+        .then(m => m.LoginComponent)
+  },
   {
     path: 'admin/productos',
+    canActivate: [adminAuthGuard],
     loadComponent: () =>
       import('./features/admin/productos/productos.component')
         .then(m => m.ProductosComponent)
   },
-
-
   {
     path: 'cart',
     loadComponent: () => import('./features/cart/cart.component').then(m => m.CartComponent)
@@ -61,8 +69,6 @@ export const routes: Routes = [
     path: 'contact',
     loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
   },
-
-
   {
     path: '**',
     redirectTo: 'home'

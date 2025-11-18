@@ -161,7 +161,7 @@ export class ProductService {
   // -----------------------------------------------------------------------------------
   async subirImagen(file: File): Promise<string> {
     const safeName = file.name.replace(/\s+/g, '_');
-    const ruta = `productos/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
+    const ruta = `imagenes/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
     const storageRef = ref(this.storage, ruta);
 
     // Puedes agregar metadata si quieres:

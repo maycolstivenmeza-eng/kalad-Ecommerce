@@ -1,8 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ProductService } from '../../../shared/services/product.service';
 import { Product } from '../../../shared/models/product.model';
+import { Subscription } from 'rxjs';
+
+// 👇 IMPORTACIONES
+import { AuthService } from '../../../shared/services/auth.service';
+import { Router } from '@angular/router';
 
 type AdminProductForm = {
   nombre: string;
@@ -14,7 +19,7 @@ type AdminProductForm = {
   stock: number | null;
   coloresTexto: string;
   imagen: string;
-  imagenes: string[]; // Galería secundaria
+  imagenes: string[];
 };
 
 @Component({
@@ -24,7 +29,7 @@ type AdminProductForm = {
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css'],
 })
-export class ProductosComponent {
+export class ProductosComponent implements OnInit, OnDestroy {
   producto: AdminProductForm = this.obtenerEstadoInicial();
 
   // Imagen principal
@@ -33,11 +38,12 @@ export class ProductosComponent {
 
   // Imágenes secundarias
   imagenesSeleccionadas: File[] = [];
-  previewImagenes: string[] = []; // SIEMPRE contiene guardadas + nuevas
+  previewImagenes: string[] = [];
 
   // Listado
   productos: Product[] = [];
   productosFiltrados: Product[] = [];
+  private productosSub?: Subscription;
 
   // Filtros
   filtroNombre = '';
@@ -57,14 +63,29 @@ export class ProductosComponent {
   ];
   readonly badges: Product['badge'][] = ['Nuevo', 'Oferta', 'Limitada', null];
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  async ngOnInit() {
+  // ==========================================================
+  // INIT
+  // ==========================================================
+  ngOnInit() {
     this.cargarProductos();
   }
 
+  ngOnDestroy() {
+    this.productosSub?.unsubscribe();
+  }
+
+  // ==========================================================
+  // CARGAR LISTA
+  // ==========================================================
   cargarProductos() {
-    this.productService.getAllProducts().subscribe((data) => {
+    this.productosSub?.unsubscribe();
+    this.productosSub = this.productService.getAllProducts().subscribe((data) => {
       this.productos = data ?? [];
       this.aplicarFiltros();
     });
@@ -92,73 +113,42 @@ export class ProductosComponent {
     const input = event.target as HTMLInputElement;
     const archivo = input.files?.[0];
 
-    if (!archivo) {
-      this.imagenSeleccionada = null;
-      this.previewUrl = null;
-      return;
-    }
+    if (!archivo) return;
 
-    if (archivo.size > 1 * 1024 * 1024) {
-      alert('La imagen es muy grande. Máximo 1MB.');
-      input.value = '';
-      return;
-    }
-
-    const formatos = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!formatos.includes(archivo.type)) {
-      alert('Solo se acepta JPG, PNG o WEBP.');
-      input.value = '';
-      return;
-    }
-
-    const lector = new FileReader();
-    lector.onload = (e: any) => {
-      const img = new Image();
-      img.onload = () => {
-        if (img.width < 600 || img.height < 600) {
-          alert(`Imagen muy pequeña (${img.width}x${img.height}). Mínimo 600x600px.`);
-          input.value = '';
-          return;
-        }
-
-        this.comprimirImagen(archivo).then((comp) => {
-          this.imagenSeleccionada = comp;
-          this.generarPreview(comp);
-        });
-      };
-      img.src = e.target.result;
-    };
-
-    lector.readAsDataURL(archivo);
-  }
-
-  generarPreview(archivo: File) {
     const reader = new FileReader();
     reader.onload = () => (this.previewUrl = reader.result as string);
     reader.readAsDataURL(archivo);
+
+    this.imagenSeleccionada = archivo;
+  }
+
+  limpiarImagen() {
+    this.imagenSeleccionada = null;
+    this.previewUrl = null;
+    if (this.modoEdicion) this.producto.imagen = '';
+  }
+
+  faltaImagenPrincipal() {
+    return !this.modoEdicion && !this.previewUrl;
   }
 
   // ==========================================================
-  // IMÁGENES SECUNDARIAS
+  // MULTI IMAGEN
   // ==========================================================
   seleccionarMultiplesImagenes(event: Event) {
     const input = event.target as HTMLInputElement;
-    const archivos = input.files;
-    if (!archivos) return;
+    const files = input.files;
 
-    if (archivos.length + this.previewImagenes.length > 4) {
-      alert('Máximo 4 imágenes adicionales.');
-      return;
-    }
+    if (!files) return;
 
-    Array.from(archivos).forEach((archivo) => {
+    for (let file of Array.from(files)) {
       const reader = new FileReader();
       reader.onload = () => {
         this.previewImagenes.push(reader.result as string);
-        this.imagenesSeleccionadas.push(archivo);
+        this.imagenesSeleccionadas.push(file);
       };
-      reader.readAsDataURL(archivo);
-    });
+      reader.readAsDataURL(file);
+    }
 
     input.value = '';
   }
@@ -170,8 +160,7 @@ export class ProductosComponent {
       guardadas.splice(index, 1);
       this.producto.imagenes = [...guardadas];
     } else {
-      const idxNueva = index - guardadas.length;
-      this.imagenesSeleccionadas.splice(idxNueva, 1);
+      this.imagenesSeleccionadas.splice(index - guardadas.length, 1);
     }
 
     this.previewImagenes.splice(index, 1);
@@ -186,30 +175,23 @@ export class ProductosComponent {
       return;
     }
 
-    if (this.faltaImagenPrincipal()) {
-      alert('Selecciona una imagen principal antes de guardar.');
-      return;
-    }
-
     try {
       // Subir imagen principal
       if (this.imagenSeleccionada) {
         this.producto.imagen = await this.productService.subirImagen(this.imagenSeleccionada);
       }
 
-      // Subir nuevas imágenes secundarias
+      // Subir imágenes secundarias
       const nuevasUrls: string[] = [];
-      for (const archivo of this.imagenesSeleccionadas) {
-        const url = await this.productService.subirImagen(archivo);
-        nuevasUrls.push(url);
+      for (let archivo of this.imagenesSeleccionadas) {
+        nuevasUrls.push(await this.productService.subirImagen(archivo));
       }
 
-      // Mezclar (guardadas + nuevas)
       const imagenesFinales = this.modoEdicion
         ? [...(this.producto.imagenes ?? []), ...nuevasUrls]
         : nuevasUrls;
 
-      // Normalizar colores
+      // Crear payload
       const colores = (this.producto.coloresTexto || '')
         .split(',')
         .map((c) => c.trim())
@@ -217,49 +199,40 @@ export class ProductosComponent {
 
       const payload: Omit<Product, 'id'> = {
         nombre: this.producto.nombre.trim(),
-        precio: Number(this.producto.precio) || 0,
+        precio: Number(this.producto.precio),
         descripcion: this.producto.descripcion.trim(),
         categoria: this.producto.categoria,
         coleccion: this.producto.coleccion,
         imagen: this.producto.imagen,
         colores,
         color: colores[0] ?? '',
-        stock: Number(this.producto.stock) || 0,
-        badge: this.producto.badge ?? null,
+        stock: Number(this.producto.stock),
+        badge: this.producto.badge,
         imagenes: imagenesFinales,
       };
 
+      // Crear o actualizar
       if (this.modoEdicion && this.idProductoEdicion) {
         await this.productService.updateProduct(this.idProductoEdicion, payload);
-        alert('Producto actualizado correctamente.');
+        alert('Producto actualizado');
       } else {
         await this.productService.createProduct(payload);
-        alert('Producto agregado correctamente.');
+        alert('Producto agregado');
       }
 
-      // Reset UI
-      this.cargarProductos();
+      // Reset
       form.resetForm(this.obtenerEstadoInicial());
-
-      this.modoEdicion = false;
-      this.idProductoEdicion = null;
-
       this.previewUrl = null;
       this.previewImagenes = [];
       this.imagenesSeleccionadas = [];
+      this.modoEdicion = false;
+
+      this.cargarProductos();
 
     } catch (e) {
       console.error(e);
-      alert('Error guardando el producto.');
+      alert('Error guardando el producto');
     }
-  }
-
-  faltaImagenPrincipal(): boolean {
-    return !this.modoEdicion && !this.tieneImagenPrincipal();
-  }
-
-  private tieneImagenPrincipal(): boolean {
-    return !!this.imagenSeleccionada || !!(this.producto.imagen && this.producto.imagen.trim());
   }
 
   // ==========================================================
@@ -272,19 +245,19 @@ export class ProductosComponent {
     const colores = producto.colores?.length ? producto.colores : [producto.color];
 
     this.producto = {
-      nombre: producto.nombre ?? '',
-      precio: producto.precio ?? null,
-      descripcion: producto.descripcion ?? '',
-      categoria: producto.categoria ?? '',
-      coleccion: producto.coleccion ?? 'kalad-origen',
-      badge: producto.badge ?? null,
-      stock: producto.stock ?? null,
+      nombre: producto.nombre,
+      precio: producto.precio,
+      descripcion: producto.descripcion,
+      categoria: producto.categoria,
+      coleccion: producto.coleccion,
+      badge: producto.badge,
+      stock: producto.stock,
       coloresTexto: colores.join(', '),
-      imagen: producto.imagen ?? '',
+      imagen: producto.imagen,
       imagenes: [...(producto.imagenes ?? [])],
     };
 
-    this.previewUrl = producto.imagen ?? null;
+    this.previewUrl = producto.imagen;
     this.previewImagenes = [...(producto.imagenes ?? [])];
     this.imagenesSeleccionadas = [];
 
@@ -295,16 +268,12 @@ export class ProductosComponent {
   // ELIMINAR
   // ==========================================================
   async eliminarProducto(id?: string) {
-    if (!id) return alert('No se pudo identificar el producto');
-    if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
+    if (!id) return;
 
-    try {
-      await this.productService.deleteProduct(id);
-      alert('Producto eliminado.');
-      this.cargarProductos();
-    } catch (e) {
-      alert('Error eliminando producto');
-    }
+    if (!confirm('¿Seguro que deseas eliminarlo?')) return;
+
+    await this.productService.deleteProduct(id);
+    this.cargarProductos();
   }
 
   // ==========================================================
@@ -313,14 +282,12 @@ export class ProductosComponent {
   aplicarFiltros() {
     const nombre = this.filtroNombre.toLowerCase();
 
-    this.productosFiltrados = this.productos.filter((p) => {
-      return (
-        (!nombre || p.nombre.toLowerCase().includes(nombre)) &&
-        (!this.filtroCategoria || p.categoria === this.filtroCategoria) &&
-        (!this.filtroColeccion || p.coleccion === this.filtroColeccion) &&
-        (!this.filtroBadge || p.badge === this.filtroBadge)
-      );
-    });
+    this.productosFiltrados = this.productos.filter((p) =>
+      (!nombre || p.nombre.toLowerCase().includes(nombre)) &&
+      (!this.filtroCategoria || p.categoria === this.filtroCategoria) &&
+      (!this.filtroColeccion || p.coleccion === this.filtroColeccion) &&
+      (!this.filtroBadge || p.badge === this.filtroBadge)
+    );
   }
 
   resetFiltros() {
@@ -331,59 +298,15 @@ export class ProductosComponent {
     this.aplicarFiltros();
   }
 
-  // ==========================================================
-  // COMPRESIÓN
-  // ==========================================================
-  async comprimirImagen(
-    archivo: File,
-    calidad: number = 0.8,
-    maxWidth: number = 1080,
-    maxHeight: number = 1080
-  ): Promise<File> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-
-      reader.onload = (e: any) => {
-        const img = new Image();
-        img.onload = () => {
-          let { width, height } = img;
-
-          if (width > maxWidth || height > maxHeight) {
-            const ratio = Math.min(maxWidth / width, maxHeight / height);
-            width *= ratio;
-            height *= ratio;
-          }
-
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext('2d')!;
-          ctx.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) return reject('Error al comprimir');
-              resolve(new File([blob], archivo.name, { type: 'image/webp' }));
-            },
-            'image/webp',
-            calidad
-          );
-        };
-
-        img.src = e.target.result;
-      };
-
-      reader.readAsDataURL(archivo);
-    });
+  obtenerImagenProducto(producto: Product): string | null {
+    return producto.imagen || producto.imagenes?.[0] || null;
   }
 
-  limpiarImagen() {
-    this.imagenSeleccionada = null;
-    this.previewUrl = null;
-
-    if (this.modoEdicion) {
-      this.producto.imagen = '';
-    }
+  // ==========================================================
+  // LOGOUT
+  // ==========================================================
+  async logout() {
+    await this.authService.logout();
+    this.router.navigate(['/admin/login']);
   }
 }

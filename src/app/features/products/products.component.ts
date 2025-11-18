@@ -39,6 +39,7 @@ export class ProductsComponent implements OnInit {
 
   loading = true;
   error: string | null = null;
+  private placeholderImage = 'assets/images/Producto_1.jpg';
 
   constructor(
     private productService: ProductService,
@@ -157,6 +158,19 @@ export class ProductsComponent implements OnInit {
   // =======================
   addToCart(product: Product) {
     alert(`${product.nombre} agregado al carrito`);
+  }
+
+  resolveImage(product: Product): string {
+    return product.imagen && product.imagen.trim().length > 0
+      ? product.imagen
+      : this.placeholderImage;
+  }
+
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement | null;
+    if (target && !target.src.includes(this.placeholderImage)) {
+      target.src = this.placeholderImage;
+    }
   }
 
   // Formatear precio

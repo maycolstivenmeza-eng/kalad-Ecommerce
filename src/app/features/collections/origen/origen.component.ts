@@ -16,6 +16,7 @@ export class OrigenComponent implements OnInit, OnDestroy {
   productos: Product[] = [];
   filtros = { ordenar: false, talla: false, color: false };
   private sub?: Subscription;
+  private placeholderImage = 'assets/images/Producto_1.jpg';
 
   constructor(private productService: ProductService) {}
 
@@ -25,6 +26,19 @@ export class OrigenComponent implements OnInit, OnDestroy {
       .subscribe((items) => {
         this.productos = [...items];
       });
+  }
+
+  resolveImage(product: Product): string {
+    return product.imagen && product.imagen.trim().length > 0
+      ? product.imagen
+      : this.placeholderImage;
+  }
+
+  onImageError(event: Event) {
+    const target = event.target as HTMLImageElement | null;
+    if (target && !target.src.includes(this.placeholderImage)) {
+      target.src = this.placeholderImage;
+    }
   }
 
   ngOnDestroy(): void {

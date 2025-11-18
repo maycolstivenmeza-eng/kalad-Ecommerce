@@ -62,7 +62,12 @@
             <span class="badge" *ngIf="p.badge" [ngClass]="p.badge">
               {{ p.badge }}
             </span>
-            <img class="img primary" [src]="p.imagen" [alt]="p.nombre" />
+            <img
+              class="img primary"
+              [src]="resolveImage(p)"
+              [alt]="p.nombre"
+              (error)="onImageError($event)"
+            />
             <img class="img hover" *ngIf="p.imagenes && p.imagenes.length > 0" [src]="p.imagenes[0]" [alt]="p.nombre" />
           </a>
 

@@ -112,7 +112,12 @@
               {{ p.badge }}
             </span>
             <!-- Imagen principal -->
-            <img class="img primary" [src]="p.imagen" [alt]="p.nombre" />
+            <img
+              class="img primary"
+              [src]="resolveImage(p)"
+              [alt]="p.nombre"
+              (error)="onImageError($event)"
+            />
             <!-- Imagen secundaria (si existe) para hover -->
             <img
               class="img hover"

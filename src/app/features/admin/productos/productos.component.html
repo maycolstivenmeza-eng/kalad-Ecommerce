@@ -1,158 +1,78 @@
 <div class="admin-container">
 
-  <h2>Gestión de productos</h2>
+  <!-- HEADER ADMIN -->
+  <div class="admin-header">
+    <h2>Gestión de productos</h2>
+    <button (click)="logout()" class="logout-btn">Cerrar sesión</button>
+  </div>
 
   <form #adminForm="ngForm" novalidate (ngSubmit)="guardarProducto(adminForm)">
 
     <!-- NOMBRE -->
     <label for="nombre">Nombre del producto</label>
-    <input
-      id="nombre"
-      type="text"
-      name="nombre"
-      [(ngModel)]="producto.nombre"
-      required
-      maxlength="80"
-      class="input"
-    />
+    <input id="nombre" type="text" name="nombre" [(ngModel)]="producto.nombre" required maxlength="80" class="input"/>
 
     <!-- PRECIO -->
     <label for="precio">Precio</label>
-    <input
-      id="precio"
-      type="number"
-      name="precio"
-      [(ngModel)]="producto.precio"
-      required
-      min="0"
-      step="0.01"
-      class="input"
-    />
+    <input id="precio" type="number" name="precio" [(ngModel)]="producto.precio" required min="0" step="0.01" class="input"/>
 
     <!-- BADGE -->
     <label for="badge">Etiqueta (badge)</label>
-    <select
-      id="badge"
-      name="badge"
-      [(ngModel)]="producto.badge"
-      class="input"
-    >
-      <option *ngFor="let badge of badges" [ngValue]="badge">
-        {{ badge || 'Sin etiqueta' }}
-      </option>
+    <select id="badge" name="badge" [(ngModel)]="producto.badge" class="input">
+      <option *ngFor="let badge of badges" [ngValue]="badge">{{ badge || 'Sin etiqueta' }}</option>
     </select>
 
     <!-- CATEGORÍA -->
     <label for="categoria">Categoría</label>
-    <select
-      id="categoria"
-      name="categoria"
-      [(ngModel)]="producto.categoria"
-      required
-      class="input"
-    >
+    <select id="categoria" name="categoria" [(ngModel)]="producto.categoria" required class="input">
       <option value="" disabled>Selecciona una categoría</option>
-      <option *ngFor="let categoria of categorias" [value]="categoria">
-        {{ categoria }}
-      </option>
+      <option *ngFor="let categoria of categorias" [value]="categoria">{{ categoria }}</option>
     </select>
 
     <!-- COLECCIÓN -->
     <label for="coleccion">Colección</label>
-    <select
-      id="coleccion"
-      name="coleccion"
-      [(ngModel)]="producto.coleccion"
-      required
-      class="input"
-    >
-      <option *ngFor="let coleccion of colecciones" [value]="coleccion.id">
-        {{ coleccion.label }}
-      </option>
+    <select id="coleccion" name="coleccion" [(ngModel)]="producto.coleccion" required class="input">
+      <option *ngFor="let coleccion of colecciones" [value]="coleccion.id">{{ coleccion.label }}</option>
     </select>
 
     <!-- COLORES -->
     <label for="colores">Colores (separados por coma)</label>
-    <input
-      id="colores"
-      type="text"
-      name="colores"
-      [(ngModel)]="producto.coloresTexto"
-      placeholder="Beige, Café, Arena"
-      class="input"
-    />
+    <input id="colores" type="text" name="colores" [(ngModel)]="producto.coloresTexto" placeholder="Beige, Café, Arena" class="input"/>
 
     <!-- STOCK -->
     <label for="stock">Stock disponible</label>
-    <input
-      id="stock"
-      type="number"
-      name="stock"
-      [(ngModel)]="producto.stock"
-      required
-      min="0"
-      class="input"
-    />
+    <input id="stock" type="number" name="stock" [(ngModel)]="producto.stock" required min="0" class="input"/>
 
     <!-- DESCRIPCIÓN -->
     <label for="descripcion">Descripción</label>
-    <textarea
-      id="descripcion"
-      name="descripcion"
-      [(ngModel)]="producto.descripcion"
-      required
-      rows="4"
-      class="input"
-    ></textarea>
+    <textarea id="descripcion" name="descripcion" [(ngModel)]="producto.descripcion" required rows="4" class="input"></textarea>
 
     <!-- IMAGEN PRINCIPAL -->
     <label for="imagen">Imagen principal del producto</label>
-    <input
-      id="imagen"
-      type="file"
-      (change)="seleccionarImagen($event)"
-      accept="image/*"
-      class="input"
-      [required]="!modoEdicion"
-    />
+    <input id="imagen" type="file" (change)="seleccionarImagen($event)" accept="image/*" class="input" [required]="!modoEdicion"/>
+
     <p class="input-hint error" *ngIf="faltaImagenPrincipal()">
       Debes seleccionar una imagen principal para crear el producto.
     </p>
 
-    <!-- PREVIEW NUEVA -->
-    <div class="preview-container" *ngIf="previewUrl && imagenSeleccionada">
-      <p>Vista previa:</p>
-      <img [src]="previewUrl" class="preview-img" />
+    <!-- PREVIEW IMAGEN PRINCIPAL -->
+    <div class="preview-container" *ngIf="previewUrl">
+      <img [src]="previewUrl" class="preview-img"/>
       <button type="button" class="btn-eliminar-img" (click)="limpiarImagen()">Eliminar imagen</button>
-    </div>
-
-    <!-- IMAGEN ACTUAL -->
-    <div class="preview-container" *ngIf="!imagenSeleccionada && modoEdicion && producto.imagen">
-      <p>Imagen actual:</p>
-      <img [src]="producto.imagen" class="preview-img" />
-      <button type="button" class="btn-eliminar-img" (click)="limpiarImagen()">Quitar imagen</button>
     </div>
 
     <!-- IMÁGENES SECUNDARIAS -->
     <label for="imagenesSec">Imágenes adicionales (máximo 4)</label>
-    <input
-      id="imagenesSec"
-      type="file"
-      multiple
-      accept="image/*"
-      (change)="seleccionarMultiplesImagenes($event)"
-      class="input"
-    />
+    <input id="imagenesSec" type="file" multiple accept="image/*" (change)="seleccionarMultiplesImagenes($event)" class="input"/>
 
-    <!-- PREVIEW SECUNDARIAS -->
     <div class="preview-multiplas" *ngIf="previewImagenes.length > 0">
       <div class="preview-multi-item" *ngFor="let img of previewImagenes; let i = index">
-        <img [src]="img" class="preview-multi-img" />
+        <img [src]="img" class="preview-multi-img"/>
         <button type="button" class="preview-multi-delete" (click)="eliminarImagenSecundaria(i)">✕</button>
       </div>
     </div>
 
-    <!-- BOTÓN -->
+    <!-- BOTÓN GUARDAR -->
     <button class="btn-guardar" type="submit" [disabled]="adminForm.invalid || faltaImagenPrincipal()">
       {{ modoEdicion ? 'Actualizar producto' : 'Guardar producto' }}
     </button>
@@ -163,67 +83,84 @@
   <div class="filtros-bar">
     <input
       type="text"
-      placeholder="Buscar por nombre…"
+      placeholder="Buscar por nombre"
       [(ngModel)]="filtroNombre"
       (ngModelChange)="aplicarFiltros()"
     />
 
-    <select [(ngModel)]="filtroCategoria" (change)="aplicarFiltros()">
+    <select [(ngModel)]="filtroCategoria" (ngModelChange)="aplicarFiltros()">
       <option value="">Todas las categorías</option>
-      <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
+      <option *ngFor="let categoria of categorias" [value]="categoria">
+        {{ categoria }}
+      </option>
     </select>
 
-    <select [(ngModel)]="filtroColeccion" (change)="aplicarFiltros()">
+    <select [(ngModel)]="filtroColeccion" (ngModelChange)="aplicarFiltros()">
       <option value="">Todas las colecciones</option>
-      <option *ngFor="let col of colecciones" [value]="col.id">{{ col.label }}</option>
+      <option *ngFor="let coleccion of colecciones" [value]="coleccion.id">
+        {{ coleccion.label }}
+      </option>
     </select>
 
-    <select [(ngModel)]="filtroBadge" (change)="aplicarFiltros()">
+    <select [(ngModel)]="filtroBadge" (ngModelChange)="aplicarFiltros()">
       <option value="">Todas las etiquetas</option>
-      <option *ngFor="let b of badges" [ngValue]="b">{{ b || 'Sin etiqueta' }}</option>
+      <option *ngFor="let badge of badges" [ngValue]="badge">
+        {{ badge || 'Sin etiqueta' }}
+      </option>
     </select>
 
-    <button class="btn-reset" type="button" (click)="resetFiltros()">Limpiar</button>
+    <button type="button" class="btn-reset" (click)="resetFiltros()">Limpiar</button>
   </div>
 
-  <!-- CONTADOR -->
-  <div class="filtro-resultado">
-    Mostrando <strong>{{ productosFiltrados.length }}</strong> de {{ productos.length }} productos
-  </div>
+  <p class="filtro-resultado">
+    Mostrando {{ productosFiltrados.length }} de {{ productos.length }} productos
+  </p>
 
-  <!-- LISTADO -->
   <h3 class="titulo-lista">Productos Registrados</h3>
 
-  <table class="tabla-productos">
-    <thead>
-      <tr>
-        <th>Imagen</th>
-        <th>Nombre</th>
-        <th>Precio</th>
-        <th>Categoría</th>
-        <th>Colección</th>
-        <th>Badge</th>
-        <th>Stock</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
+  <ng-container *ngIf="productosFiltrados.length; else sinProductos">
+    <table class="tabla-productos">
+      <thead>
+        <tr>
+          <th>Imagen</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Categoría</th>
+          <th>Colección</th>
+          <th>Badge</th>
+          <th>Stock</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let prod of productosFiltrados">
+          <td>
+            <ng-container *ngIf="obtenerImagenProducto(prod) as imagen; else sinImagenTpl">
+              <img [src]="imagen" [alt]="prod.nombre" class="img-tabla" />
+            </ng-container>
+          </td>
+          <td>{{ prod.nombre }}</td>
+          <td>{{ prod.precio | currency:'USD':'symbol':'1.0-0' }}</td>
+          <td>{{ prod.categoria }}</td>
+          <td>{{ prod.coleccion }}</td>
+          <td>{{ prod.badge || '-' }}</td>
+          <td>{{ prod.stock }}</td>
+          <td>
+            <div class="acciones">
+              <button type="button" class="btn-editar" (click)="editarProducto(prod)">Editar</button>
+              <button type="button" class="btn-eliminar" (click)="eliminarProducto(prod.id)">Eliminar</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
 
-    <tbody>
-      <tr *ngFor="let p of productosFiltrados">
-        <td><img [src]="p.imagen" class="img-tabla" /></td>
-        <td>{{ p.nombre }}</td>
-        <td>${{ p.precio }}</td>
-        <td>{{ p.categoria }}</td>
-        <td>{{ p.coleccion }}</td>
-        <td>{{ p.badge || '-' }}</td>
-        <td>{{ p.stock }}</td>
+  <ng-template #sinImagenTpl>
+    <span class="sin-imagen">-</span>
+  </ng-template>
 
-        <td class="acciones">
-          <button class="btn-editar" (click)="editarProducto(p)">Editar</button>
-          <button class="btn-eliminar" (click)="eliminarProducto(p.id)">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
+  <ng-template #sinProductos>
+    <p class="filtro-resultado">No hay productos registrados todavía.</p>
+  </ng-template>
 </div>
