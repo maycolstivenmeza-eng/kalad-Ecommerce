@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Product } from '../../../shared/models/product.model';
 import { ProductService } from '../../../shared/services/product.service';
+import { CartService } from '../../../shared/services/cart.service';
 
 @Component({
   selector: 'app-origen',
@@ -18,7 +19,10 @@ export class OrigenComponent implements OnInit, OnDestroy {
   private sub?: Subscription;
   private placeholderImage = 'assets/images/Producto_1.jpg';
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private cartService: CartService
+  ) {}
 
   async ngOnInit() {
     this.sub = this.productService
@@ -72,5 +76,9 @@ export class OrigenComponent implements OnInit, OnDestroy {
     this.open[i] = !this.open[i];
   }
 
+  addToCart(producto: Product, event: Event) {
+    event.stopPropagation();
+    this.cartService.addProduct(producto, 1);
+  }
 
 }

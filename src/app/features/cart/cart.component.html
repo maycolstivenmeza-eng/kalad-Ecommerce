@@ -1,30 +1,61 @@
-<main class="carrito-container">
-    <h2>Carrito</h2>
-    <label class="seleccionar-todos">
-        <input type="checkbox" id="selectAll" checked> Seleccionar todos los productos
-    </label>
+﻿<main class="carrito-container">
+  <div class="carrito-header">
+    <h2>Tu carrito</h2>
+    <button class="btn-link" (click)="clear()" *ngIf="(cartItems$ | async)?.length">Vaciar carrito</button>
+  </div>
 
+  <ng-container *ngIf="cartItems$ | async as items; else carritoVacio">
     <div class="carrito-content">
-        <div class="productos" id="carritoProductos">
-            <!-- Productos cargados dinámicamente -->
-        </div>
-
-        <!-- RESUMEN -->
-        <aside class="resumen">
-            <p>Envíos a todo Colombia</p>
-            <div class="linea"></div>
-            <div class="subtotal">
-                <span>Subtotal</span>
-                <strong id="subtotal">$0</strong>
+      <section class="productos">
+        <div class="item" *ngFor="let item of items">
+          <img [src]="item.imagen" [alt]="item.nombre">
+          <div class="detalle">
+            <h3>{{ item.nombre }}</h3>
+            <p *ngIf="item.color">Color: {{ item.color }}</p>
+            <p *ngIf="item.sku" class="sku">SKU: {{ item.sku }}</p>
+            <div class="acciones">
+              <div class="qty">
+                <button (click)="decrease(item)">-</button>
+                <span>{{ item.qty }}</span>
+                <button (click)="increase(item)">+</button>
+              </div>
+              <strong>{{ (item.precio * item.qty) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
             </div>
-            <button class="btn-comprar">Comprar Ahora</button>
-        </aside>
+          </div>
+          <button class="remove" (click)="remove(item)">Eliminar</button>
+        </div>
+      </section>
+
+      <aside class="resumen">
+        <h3>Resumen</h3>
+        <div class="linea"></div>
+        <div class="subtotal">
+          <span>Productos ({{ totalItems$ | async }})</span>
+          <strong>{{ (totalAmount$ | async) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+        <button class="btn-comprar" routerLink="/checkout">Ir a checkout</button>
+      </aside>
     </div>
+  </ng-container>
 
-    <!-- SECCIÓN TE PUEDE INTERESAR -->
-    <section class="interesar-section">
-        <h2 class="interesar-titulo-linea"><span>Te Puede Interesar</span></h2>
-        <div id="interesarGrid" class="interesar-grid"></div>
-    </section>
-
+  <ng-template #carritoVacio>
+    <div class="empty">
+      <p>Tu carrito esta vacio. Explora nuestras colecciones.</p>
+      <a routerLink="/products" class="btn-comprar">Ver productos</a>
+    </div>
+  </ng-template>
+  <section class="interesar" *ngIf="recommendedProducts.length">
+    <h3>Te Puede Interesar</h3>
+    <div class="interesar-grid">
+      <article class="card" *ngFor="let prod of recommendedProducts" [routerLink]="['/products', prod.id]">
+        <img [src]="prod.imagen" [alt]="prod.nombre">
+        <h4>{{ prod.nombre }}</h4>
+        <p>{{ prod.descripcionCorta }}</p>
+        <div class="card-footer">
+          <span>{{ prod.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          <button type="button" (click)="addSuggested(prod, $event)">Agregar</button>
+        </div>
+      </article>
+    </div>
+  </section>
 </main>

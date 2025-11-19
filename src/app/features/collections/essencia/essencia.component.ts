@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { Product } from '../../../shared/models/product.model';
 import { ProductService } from '../../../shared/services/product.service';
+import { CartService } from '../../../shared/services/cart.service';
 
 @Component({
   selector: 'app-essencia',
@@ -20,7 +21,10 @@ export class EssenciaComponent implements OnInit, OnDestroy {
     this.open[i] = !this.open[i];
   }
 
-  constructor(private productService: ProductService) {}
+  constructor(
+    private productService: ProductService,
+    private cartService: CartService
+  ) {}
 
   ngOnInit(): void {
     this.sub = this.productService
@@ -34,4 +38,8 @@ export class EssenciaComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
+  addToCart(producto: Product, event: Event) {
+    event.stopPropagation();
+    this.cartService.addProduct(producto, 1);
+  }
 }

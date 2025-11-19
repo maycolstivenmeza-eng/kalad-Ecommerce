@@ -14,17 +14,25 @@
     <aside class="gallery">
       <div
         class="thumb"
-        *ngFor="let img of thumbnailImages; let i = index"
-        [class.active]="selectedImage === img"
-        (click)="selectImage(img)"
+        *ngFor="let thumb of thumbnailImages; let i = index"
+        [class.active]="selectedVariant === thumb"
+        (click)="selectImage(thumb)"
       >
-        <img [src]="img" />
+        <img
+          [src]="thumb.src"
+          [style.object-position]="thumb.focus || 'center'"
+          [style.transform]="thumb.zoom ? 'scale(' + thumb.zoom + ')' : 'scale(1)'"
+        />
       </div>
     </aside>
 
     <!-- ===== IMAGEN PRINCIPAL ===== -->
     <div class="main-image">
-      <img [src]="selectedImage" />
+      <img
+        [src]="selectedImage"
+        [style.object-position]="selectedImageStyles.objectPosition"
+        [style.transform]="selectedImageStyles.transform"
+      />
     </div>
 
     <!-- ===== INFORMACIÓN ===== -->
@@ -34,6 +42,7 @@
       <h1 class="title">{{ p.nombre }}</h1>
 
       <p class="price">{{ formatPrice(p.precio) }}</p>
+      <p class="sku" *ngIf="p.sku">SKU: {{ p.sku }}</p>
 
       <!-- COLOR -->
       <div class="color-section">
@@ -42,10 +51,11 @@
         <div class="colors">
           <div
             class="color-circle"
-            *ngFor="let c of (p.colores || [])"
-            [style.background]="c"
-            [class.selected]="selectedColor === c"
-            (click)="selectColor(c)"
+            *ngFor="let chip of colorChips"
+            [style.background]="chip.css"
+            [class.selected]="selectedColor === chip.label"
+            (click)="selectColor(chip.label)"
+            [attr.title]="chip.label"
           ></div>
         </div>
       </div>
@@ -91,9 +101,7 @@
     <h2>Características</h2>
 
     <p>
-      La {{ p.nombre }} está elaborada con materiales artesanales locales de alta calidad.
-      Cada pieza es trabajada a mano por artesanas colombianas, brindando un diseño elegante,
-      fresco y duradero ideal para tus actividades diarias.
+      {{ featureDescription }}
     </p>
   </section>
 

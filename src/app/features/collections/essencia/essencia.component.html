@@ -70,8 +70,8 @@
               <p>{{ p.precio  }}</p>
             </div>
 
-            <button class="btn-cart">
-              🛒
+            <button class="btn-cart" (click)="addToCart(p, $event)">
+              &#128722;
             </button>
           </div>
         </div>
@@ -82,4 +82,5 @@
 
   </div>
 </div>
+
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ProductService } from '../../shared/services/product.service';
 import { Product } from '../../shared/models/product.model';
+import { CartService } from '../../shared/services/cart.service';
 
 type OrderOption = 'az' | 'za' | 'priceAsc' | 'priceDesc' | 'new';
 
@@ -48,7 +49,8 @@ export class ProductsComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private router: Router
+    private router: Router,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -167,9 +169,9 @@ export class ProductsComponent implements OnInit {
   getOrderLabel(option: OrderOption): string {
     switch (option) {
       case 'az':
-        return 'A-Z';
+        return 'A - Z';
       case 'za':
-        return 'Z-A';
+        return 'Z - A';
       case 'priceAsc':
         return 'Menor precio';
       case 'priceDesc':
@@ -189,10 +191,10 @@ export class ProductsComponent implements OnInit {
   }
 
   // =======================
-  //  Carrito (prueba)
+  //  Carrito
   // =======================
   addToCart(product: Product) {
-    alert(`${product.nombre} agregado al carrito`);
+    this.cartService.addProduct(product, 1);
   }
 
   resolveImage(product: Product): string {

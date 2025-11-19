@@ -3,7 +3,9 @@
   <!-- HEADER ADMIN -->
   <div class="admin-header">
     <h2>Gestión de productos</h2>
-    <button (click)="logout()" class="logout-btn">Cerrar sesión</button>
+    <button (click)="logout()" class="logout-btn" title="Cerrar sesión">
+      Cerrar sesión
+    </button>
   </div>
 
   <div class="alert" *ngIf="mensajeSistema" [ngClass]="mensajeSistema.tipo">
@@ -51,6 +53,63 @@
     <label for="descripcion">Descripción</label>
     <textarea id="descripcion" name="descripcion" [(ngModel)]="producto.descripcion" required rows="4" class="input"></textarea>
 
+    <!-- CARACTERÍSTICAS -->
+    <label for="caracteristicas">Características destacadas</label>
+    <textarea
+      id="caracteristicas"
+      name="caracteristicas"
+      [(ngModel)]="producto.caracteristicas"
+      rows="4"
+      class="input"
+      placeholder="Materiales, proceso artesanal, beneficios, etc."
+    ></textarea>
+
+    <!-- DIMENSIONES -->
+    <fieldset class="dimensiones-fieldset">
+      <legend>Dimensiones del producto</legend>
+      <div class="dimensiones-grid">
+        <label for="dimAlto">Alto</label>
+        <input
+          id="dimAlto"
+          type="text"
+          name="dimAlto"
+          [(ngModel)]="producto.dimensiones.alto"
+          class="input"
+          placeholder="18 cm"
+        />
+
+        <label for="dimAncho">Ancho</label>
+        <input
+          id="dimAncho"
+          type="text"
+          name="dimAncho"
+          [(ngModel)]="producto.dimensiones.ancho"
+          class="input"
+          placeholder="22 cm"
+        />
+
+        <label for="dimProfundidad">Profundidad</label>
+        <input
+          id="dimProfundidad"
+          type="text"
+          name="dimProfundidad"
+          [(ngModel)]="producto.dimensiones.profundidad"
+          class="input"
+          placeholder="7 cm"
+        />
+
+        <label for="dimCapacidad">Capacidad</label>
+        <input
+          id="dimCapacidad"
+          type="text"
+          name="dimCapacidad"
+          [(ngModel)]="producto.dimensiones.capacidad"
+          class="input"
+          placeholder="4 L"
+        />
+      </div>
+    </fieldset>
+
     <!-- IMAGEN PRINCIPAL -->
     <label for="imagen">Imagen principal del producto</label>
     <input id="imagen" type="file" (change)="seleccionarImagen($event)" accept="image/*" class="input" [required]="!modoEdicion"/>
@@ -78,7 +137,7 @@
 
     <!-- BOTÓN GUARDAR -->
     <button class="btn-guardar" type="submit" [disabled]="adminForm.invalid || faltaImagenPrincipal() || guardando">
-      {{ guardando ? 'Guardando…' : (modoEdicion ? 'Actualizar producto' : 'Guardar producto') }}
+      {{ guardando ? textoBotonProcesando : textoBotonAccion }}
     </button>
 
   </form>
@@ -167,4 +226,14 @@
   <ng-template #sinProductos>
     <p class="filtro-resultado">No hay productos registrados todavía.</p>
   </ng-template>
+</div>
+
+<div
+  class="toast-notification"
+  *ngIf="toastActivo"
+  [ngClass]="toastActivo.tipo"
+  role="status"
+  aria-live="assertive"
+>
+  {{ toastActivo.texto }}
 </div>

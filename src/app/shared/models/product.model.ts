@@ -18,6 +18,12 @@ export interface Product {
     profundidad: string;
     capacidad: string;
   };
+  sku?: string;
+  descripcionCorta?: string;
+  copyPremium?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string[];
   badge?: 'Nuevo' | 'Oferta' | 'Limitada' | null;
   Etiqueta?: string | null;
 }

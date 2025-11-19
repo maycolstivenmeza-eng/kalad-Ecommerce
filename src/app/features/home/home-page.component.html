@@ -45,15 +45,32 @@
                     <a class="title" [routerLink]="['/products', product.id]">
                         {{ product.nombre }}
                     </a>
+                    <p class="excerpt" *ngIf="product.descripcionCorta">{{ product.descripcionCorta }}</p>
 
                     <div class="price-row">
                         <span class="price">{{ formatPrice(product.precio) }}</span>
                         <button
                           class="cart-btn"
                           type="button"
-                          (click)="viewProductDetails(product.id); $event.stopPropagation()"
+                          (click)="addToCart(product, $event)"
                         >
-                            <span class="cart-icon" aria-hidden="true">�Y>'</span>
+                          <svg
+                            class="cart-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <path
+                              d="M3 5h2l1.2 6.2a1 1 0 0 0 .98.8H17a1 1 0 0 0 .97-.76L20 8H7"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                            <circle cx="10" cy="19" r="1.2" fill="currentColor"></circle>
+                            <circle cx="17" cy="19" r="1.2" fill="currentColor"></circle>
+                          </svg>
                         </button>
                     </div>
                 </article>
@@ -117,3 +134,6 @@
         </div>
     </div>
 </section>
+
+
+

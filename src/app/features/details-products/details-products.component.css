@@ -1,6 +1,6 @@
 ﻿/* ===== GENERAL ===== */
 .product-page {
-  max-width: 1200px;
+  max-width: 1040px;
   margin: 30px auto;
   padding: 0 20px;
   font-family: "Quicksand", sans-serif;
@@ -22,8 +22,8 @@
 /* ===== CONTENEDOR PRINCIPAL ===== */
 .product-container {
   display: grid;
-  grid-template-columns: 100px 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 80px 1.1fr 0.9fr;
+  gap: 30px;
   align-items: flex-start;
 }
 
@@ -31,12 +31,12 @@
 .gallery {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .thumb {
-  width: 85px;
-  height: 85px;
+  width: 70px;
+  height: 70px;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid transparent;
@@ -48,6 +48,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.35s ease, object-position 0.35s ease;
 }
 
 .thumb.active {
@@ -55,10 +56,17 @@
 }
 
 /* ===== IMAGEN PRINCIPAL ===== */
+.main-image {
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 520px;
+}
+
 .main-image img {
   width: 100%;
   border-radius: 12px;
   object-fit: cover;
+  transition: transform 0.4s ease, object-position 0.4s ease;
 }
 
 /* ===== INFORMACIÓN ===== */
@@ -93,6 +101,13 @@
   margin-bottom: 30px;
 }
 
+.sku {
+  font-size: 14px;
+  color: #7a6a5c;
+  margin-top: -20px;
+  margin-bottom: 24px;
+}
+
 .subtitle {
   font-weight: 600;
   margin-bottom: 6px;
@@ -111,6 +126,7 @@
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
+  transition: border-color 0.2s ease;
 }
 
 .color-circle.selected {

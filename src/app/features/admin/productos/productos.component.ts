@@ -13,6 +13,7 @@ type AdminProductForm = {
   nombre: string;
   precio: number | null;
   descripcion: string;
+  caracteristicas: string;
   categoria: string;
   coleccion: string;
   badge: Product['badge'];
@@ -20,6 +21,12 @@ type AdminProductForm = {
   coloresTexto: string;
   imagen: string;
   imagenes: string[];
+  dimensiones: {
+    alto: string;
+    ancho: string;
+    profundidad: string;
+    capacidad: string;
+  };
 };
 
 @Component({
@@ -66,6 +73,16 @@ export class ProductosComponent implements OnInit, OnDestroy {
   private imagenResolviendo = new Set<string>();
   guardando = false;
   mensajeSistema: { tipo: 'error' | 'exito'; texto: string } | null = null;
+  toastActivo: { tipo: 'error' | 'exito'; texto: string } | null = null;
+  private toastTimeout?: ReturnType<typeof setTimeout>;
+
+  get textoBotonAccion(): string {
+    return this.modoEdicion ? 'Actualizar producto' : 'Guardar producto nuevo';
+  }
+
+  get textoBotonProcesando(): string {
+    return this.modoEdicion ? 'Actualizando...' : 'Guardando...';
+  }
 
   constructor(
     private productService: ProductService,
@@ -82,6 +99,9 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.productosSub?.unsubscribe();
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
   }
 
   // ==========================================================
@@ -100,6 +120,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
       nombre: '',
       precio: null,
       descripcion: '',
+      caracteristicas: '',
       categoria: '',
       coleccion: 'kalad-origen',
       badge: null,
@@ -107,6 +128,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
       coloresTexto: '',
       imagen: '',
       imagenes: [],
+      dimensiones: {
+        alto: '',
+        ancho: '',
+        profundidad: '',
+        capacidad: '',
+      },
     };
   }
 
@@ -176,78 +203,88 @@ export class ProductosComponent implements OnInit, OnDestroy {
   async guardarProducto(form: NgForm) {
     if (this.guardando) return;
 
-    if (form.invalid || this.faltaImagenPrincipal()) {
-      form.control.markAllAsTouched();
-      this.mensajeSistema = {
-        tipo: 'error',
-        texto: 'Revisa que todos los campos obligatorios estén completos.'
-      };
-      return;
-    }
+      if (form.invalid || this.faltaImagenPrincipal()) {
+        form.control.markAllAsTouched();
+        this.mensajeSistema = {
+          tipo: 'error',
+          texto: 'Revisa que todos los campos obligatorios estén completos.'
+        };
+        this.mostrarToast('error', this.mensajeSistema.texto);
+        return;
+      }
 
     this.mensajeSistema = null;
     this.guardando = true;
 
     try {
       // Subir imagen principal
-      if (this.imagenSeleccionada) {
-        this.producto.imagen = await this.productService.subirImagen(this.imagenSeleccionada);
-      }
+        if (this.imagenSeleccionada) {
+          this.producto.imagen = await this.productService.subirImagen(
+            this.imagenSeleccionada,
+            this.producto.coleccion
+          );
+        }
 
       // Subir imágenes secundarias
       const nuevasUrls: string[] = [];
-      for (let archivo of this.imagenesSeleccionadas) {
-        nuevasUrls.push(await this.productService.subirImagen(archivo));
-      }
+        for (let archivo of this.imagenesSeleccionadas) {
+          nuevasUrls.push(
+            await this.productService.subirImagen(archivo, this.producto.coleccion)
+          );
+        }
 
       const imagenesFinales = this.modoEdicion
         ? [...(this.producto.imagenes ?? []), ...nuevasUrls]
         : nuevasUrls;
 
       // Crear payload
-      const colores = (this.producto.coloresTexto || '')
-        .split(',')
-        .map((c) => c.trim())
-        .filter(Boolean);
+        const colores = this.normalizarColores(this.producto.coloresTexto);
+        const dimensiones = this.sanitizarDimensiones(this.producto.dimensiones);
 
-      const payload: Omit<Product, 'id'> = {
-        nombre: this.producto.nombre.trim(),
-        precio: Number(this.producto.precio),
-        descripcion: this.producto.descripcion.trim(),
-        categoria: this.producto.categoria,
-        coleccion: this.producto.coleccion,
-        imagen: this.producto.imagen,
-        colores,
-        color: colores[0] ?? '',
-        stock: Number(this.producto.stock),
-        badge: this.producto.badge,
-        imagenes: imagenesFinales,
-      };
+        const payload: Omit<Product, 'id'> = {
+          nombre: this.producto.nombre.trim(),
+          precio: Number(this.producto.precio),
+          descripcion: this.producto.descripcion.trim(),
+          caracteristicas: this.producto.caracteristicas.trim(),
+          categoria: this.producto.categoria,
+          coleccion: this.producto.coleccion,
+          imagen: this.producto.imagen,
+          colores,
+          color: colores[0] ?? '',
+          stock: Number(this.producto.stock),
+          badge: this.producto.badge,
+          imagenes: imagenesFinales,
+          dimensiones,
+        };
 
       // Crear o actualizar
-      if (this.modoEdicion && this.idProductoEdicion) {
-        await this.productService.updateProduct(this.idProductoEdicion, payload);
-        this.mensajeSistema = { tipo: 'exito', texto: 'Producto actualizado correctamente.' };
-      } else {
-        await this.productService.createProduct(payload);
-        this.mensajeSistema = { tipo: 'exito', texto: 'Producto creado correctamente.' };
-      }
+        if (this.modoEdicion && this.idProductoEdicion) {
+          await this.productService.updateProduct(this.idProductoEdicion, payload);
+          this.mensajeSistema = { tipo: 'exito', texto: 'Producto actualizado correctamente.' };
+          this.mostrarToast('exito', this.mensajeSistema.texto);
+        } else {
+          await this.productService.createProduct(payload);
+          this.mensajeSistema = { tipo: 'exito', texto: 'Producto creado correctamente.' };
+          this.mostrarToast('exito', this.mensajeSistema.texto);
+        }
 
       // Reset
       form.resetForm(this.obtenerEstadoInicial());
       this.previewUrl = null;
       this.previewImagenes = [];
       this.imagenesSeleccionadas = [];
+      this.imagenSeleccionada = null;
       this.modoEdicion = false;
 
       this.cargarProductos();
-    } catch (e) {
-      console.error(e);
-      const texto = e instanceof Error ? e.message : 'Error guardando el producto';
-      this.mensajeSistema = { tipo: 'error', texto };
-    } finally {
-      this.guardando = false;
-    }
+      } catch (e) {
+        console.error(e);
+        const texto = e instanceof Error ? e.message : 'Error guardando el producto';
+        this.mensajeSistema = { tipo: 'error', texto };
+        this.mostrarToast('error', texto);
+      } finally {
+        this.guardando = false;
+      }
   }
 
   // ==========================================================
@@ -257,22 +294,36 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.modoEdicion = true;
     this.idProductoEdicion = producto.id ?? null;
 
-    const colores = producto.colores?.length ? producto.colores : [producto.color];
+    const colores = this.normalizarColores(
+      producto.colores?.join(', ') || producto.color || ''
+    );
 
     this.producto = {
       nombre: producto.nombre,
       precio: producto.precio,
       descripcion: producto.descripcion,
+      caracteristicas: producto.caracteristicas ?? '',
       categoria: producto.categoria,
       coleccion: producto.coleccion,
       badge: producto.badge,
       stock: producto.stock,
-      coloresTexto: colores.join(', '),
+        coloresTexto: colores.join(', '),
       imagen: producto.imagen,
       imagenes: [...(producto.imagenes ?? [])],
+      dimensiones: {
+        alto: producto.dimensiones?.alto ?? '',
+        ancho: producto.dimensiones?.ancho ?? '',
+        profundidad: producto.dimensiones?.profundidad ?? '',
+        capacidad: producto.dimensiones?.capacidad ?? '',
+      },
     };
 
-    this.previewUrl = producto.imagen;
+    this.imagenSeleccionada = null;
+    this.previewUrl = producto.imagen
+      ? this.esUrlPublica(producto.imagen)
+        ? producto.imagen
+        : null
+      : null;
     this.previewImagenes = [...(producto.imagenes ?? [])];
     this.imagenesSeleccionadas = [];
 
@@ -353,5 +404,41 @@ export class ProductosComponent implements OnInit, OnDestroy {
   async logout() {
     await this.authService.logout();
     this.router.navigate(['/admin/login']);
+  }
+
+  private sanitizarDimensiones(
+    dimensiones?: AdminProductForm['dimensiones']
+  ): Product['dimensiones'] | undefined {
+    if (!dimensiones) return undefined;
+
+    const limpio = {
+      alto: dimensiones.alto?.trim() ?? '',
+      ancho: dimensiones.ancho?.trim() ?? '',
+      profundidad: dimensiones.profundidad?.trim() ?? '',
+      capacidad: dimensiones.capacidad?.trim() ?? '',
+    };
+
+    const tieneDatos = Object.values(limpio).some((valor) => valor.length > 0);
+    return tieneDatos ? limpio : undefined;
+  }
+
+  private normalizarColores(valor: string | string[]): string[] {
+    if (Array.isArray(valor)) {
+      return valor.map((c) => c.trim()).filter((c) => c.length > 0);
+    }
+    return (valor || '')
+      .split(',')
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
+  }
+
+  private mostrarToast(tipo: 'error' | 'exito', texto: string) {
+    this.toastActivo = { tipo, texto };
+    if (this.toastTimeout) {
+      clearTimeout(this.toastTimeout);
+    }
+    this.toastTimeout = setTimeout(() => {
+      this.toastActivo = null;
+    }, 4000);
   }
 }

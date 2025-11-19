@@ -18,6 +18,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Product } from '../models/product.model';
+import { buildProductCopy } from '../utils/product-copy.util';
 
 import { Storage, ref, getDownloadURL, uploadBytes } from '@angular/fire/storage';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
@@ -138,9 +139,10 @@ export class ProductService {
   // ===========================================
   // SUBIR IMÁGENES A STORAGE (SIN CORS RARO)
   // ===========================================
-  async subirImagen(file: File): Promise<string> {
-    const safeName = file.name.replace(/\s+/g, '_');
-    const ruta = `imagenes/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
+  async subirImagen(file: File, coleccion?: string): Promise<string> {
+    const carpeta = this.obtenerCarpetaColeccion(coleccion);
+    const archivo = this.generarNombreArchivo(file.name, carpeta);
+    const ruta = `imagenes/${carpeta}/${archivo}`;
     const storageRef = ref(this.storage, ruta);
 
     // En desarrollo usamos siempre el proxy HTTP para evitar CORS en uploadBytes
@@ -257,7 +259,13 @@ export class ProductService {
     if (!raw) return raw as Product;
 
     const colores = this.sanitizeStringArray(
-      Array.isArray(raw.colores) ? raw.colores : raw.color ? [raw.color] : []
+      Array.isArray(raw.colores)
+        ? raw.colores
+        : typeof raw.coloresTexto === 'string'
+          ? raw.coloresTexto.split(',')
+          : raw.color
+            ? [raw.color]
+            : []
     );
 
     const imagenes = this.sanitizeStringArray(
@@ -265,13 +273,14 @@ export class ProductService {
     );
 
     const rawBadge = raw.badge ?? raw.Etiqueta ?? raw.etiqueta ?? null;
+    const dimensiones = this.sanitizeDimensions(raw.dimensiones);
 
     const badge =
       rawBadge && this.badgeValues.includes(rawBadge as any)
         ? (rawBadge as Product['badge'])
         : null;
 
-    return {
+    const baseProduct: Product = {
       ...raw,
       id: raw.id,
       nombre: raw.nombre ?? '',
@@ -284,14 +293,24 @@ export class ProductService {
       colores,
       color: raw.color ?? colores[0] ?? '',
       stock: Number(raw.stock ?? 0),
+      caracteristicas: typeof raw.caracteristicas === 'string' ? raw.caracteristicas : '',
+      dimensiones,
       badge,
       Etiqueta: badge,
+    };
+
+    const copy = buildProductCopy(baseProduct);
+
+    return {
+      ...baseProduct,
+      ...copy,
     };
   }
 
   private prepareWritePayload(product: Partial<Product>) {
     const colores = this.sanitizeStringArray(product.colores ?? []);
     const imagenes = this.sanitizeStringArray(product.imagenes ?? []);
+    const dimensiones = this.sanitizeDimensions(product.dimensiones);
 
     const rawBadge = product.badge ?? null;
     const badge =
@@ -310,9 +329,45 @@ export class ProductService {
       color: color || null,
     };
 
+    const copy = buildProductCopy({
+      ...product,
+      colores,
+      id: product.id,
+    });
+
+    payload['sku'] = copy.sku;
+    payload['descripcionCorta'] = copy.descripcionCorta;
+    payload['copyPremium'] = copy.copyPremium;
+    payload['seoTitle'] = copy.seoTitle;
+    payload['seoDescription'] = copy.seoDescription;
+    payload['seoKeywords'] = copy.seoKeywords;
+
+    if (dimensiones) {
+      payload['dimensiones'] = dimensiones;
+    } else {
+      delete payload['dimensiones'];
+    }
+
     if ('id' in payload) delete payload['id'];
 
     return this.cleanUndefined(payload);
+  }
+
+  private sanitizeDimensions(value: any): Product['dimensiones'] | undefined {
+    if (!value || typeof value !== 'object') return undefined;
+
+    const normalize = (v: any) =>
+      typeof v === 'string' ? v.trim() : v != null ? String(v).trim() : '';
+
+    const cleaned = {
+      alto: normalize(value.alto),
+      ancho: normalize(value.ancho),
+      profundidad: normalize(value.profundidad),
+      capacidad: normalize(value.capacidad),
+    };
+
+    const hasData = Object.values(cleaned).some((v) => v.length > 0);
+    return hasData ? cleaned : undefined;
   }
 
   private sanitizeStringArray(values: any[]): string[] {
@@ -327,5 +382,40 @@ export class ProductService {
       if (obj[key] === undefined) delete obj[key];
     });
     return obj;
+  }
+
+  private obtenerCarpetaColeccion(coleccion?: string | null): string {
+    const slugColeccion = this.slugify(
+      (coleccion ?? '')
+        .replace(/^kalad[-_\s]+/i, '')
+        .replace(/coleccion/i, '')
+    );
+    return slugColeccion || 'otros';
+  }
+
+  private generarNombreArchivo(originalName: string, slugColeccion: string): string {
+    const extension = this.extraerExtension(originalName);
+    const base = originalName.replace(new RegExp(`\\.${extension}$`, 'i'), '');
+    const baseSlug = this.slugify(base);
+    const prefijo = slugColeccion || 'pieza';
+    const unico = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const nombreBase = baseSlug
+      ? `${prefijo}-${baseSlug}`
+      : `${prefijo}-pieza`;
+    return `${nombreBase}-${unico}.${extension}`;
+  }
+
+  private extraerExtension(nombre: string): string {
+    const coincidencia = nombre.match(/\.([a-zA-Z0-9]+)$/);
+    return coincidencia ? coincidencia[1].toLowerCase() : 'jpg';
+  }
+
+  private slugify(valor: string): string {
+    return valor
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 }

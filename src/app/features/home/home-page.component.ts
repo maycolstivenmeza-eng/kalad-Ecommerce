@@ -3,6 +3,7 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../shared/services/product.service';
 import { Product } from '../../shared/models/product.model';
+import { CartService } from '../../shared/services/cart.service';
 
 @Component({
   selector: 'app-home-page',
@@ -19,7 +20,8 @@ export class HomePageComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private router: Router
+    private router: Router,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -30,23 +32,48 @@ export class HomePageComponent implements OnInit {
     this.loading = true;
     this.productService.getFeaturedProducts().subscribe({
       next: (productos) => {
-        // Limitar a los primeros 4 productos destacados
-        this.featuredProducts = productos.slice(0, 4);
-        this.loading = false;
+        this.aplicarFallbackDestacados(productos);
       },
       error: (err) => {
         console.error('Error al cargar productos destacados:', err);
-        // Si hay error, cargar todos los productos como fallback
-        this.productService.getAllProducts().subscribe({
-          next: (productos) => {
-            this.featuredProducts = productos.slice(0, 4);
-            this.loading = false;
-          },
-          error: () => {
-            this.loading = false;
-          }
-        });
+        this.cargarTodosComoBackup();
       }
+    });
+  }
+
+  private aplicarFallbackDestacados(destacados: Product[]): void {
+    const iniciales = destacados.slice(0, 8);
+    if (iniciales.length === 8) {
+      this.featuredProducts = iniciales;
+      this.loading = false;
+      return;
+    }
+
+    this.productService.getAllProducts().subscribe({
+      next: (todos) => {
+        const extras = todos.filter(
+          (prod) => !iniciales.some((item) => item.id === prod.id)
+        );
+        this.featuredProducts = [...iniciales, ...extras].slice(0, 8);
+        this.loading = false;
+      },
+      error: () => {
+        this.featuredProducts = iniciales;
+        this.loading = false;
+      },
+    });
+  }
+
+  private cargarTodosComoBackup(): void {
+    this.productService.getAllProducts().subscribe({
+      next: (productos) => {
+        this.featuredProducts = productos.slice(0, 8);
+        this.loading = false;
+      },
+      error: () => {
+        this.featuredProducts = [];
+        this.loading = false;
+      },
     });
   }
 
@@ -78,5 +105,10 @@ export class HomePageComponent implements OnInit {
     return product.imagen && product.imagen.trim().length > 0
       ? product.imagen
       : this.placeholderImage;
+  }
+
+  addToCart(product: Product, event?: Event) {
+    event?.stopPropagation();
+    this.cartService.addProduct(product, 1);
   }
 }

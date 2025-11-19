@@ -1,4 +1,4 @@
-﻿<div class="coleccion-container">
+<div class="coleccion-container">
 
   <!-- ===== BREADCRUMB ===== -->
   <div class="breadcrumb">
@@ -14,20 +14,20 @@
 
   <div class="filtro" (click)="toggle(0)">
     <span>Ordenar por</span>
-    <span class="flecha" [class.open]="open[0]">�O"</span>
+    <span class="flecha" [class.open]="open[0]">&#9662;</span>
   </div>
 
   <div class="filtro" (click)="toggle(1)">
     <span>Talla</span>
-    <span class="flecha" [class.open]="open[1]">�O"</span>
+    <span class="flecha" [class.open]="open[1]">&#9662;</span>
   </div>
 
   <div class="filtro" (click)="toggle(2)">
     <span>Color</span>
-    <span class="flecha" [class.open]="open[2]">�O"</span>
+    <span class="flecha" [class.open]="open[2]">&#9662;</span>
   </div>
 
-  <!-- �?- SOLO UNA L�?NEA DESPU�%S DEL �sLTIMO FILTRO -->
+  <!-- ??- SOLO UNA L??NEA DESPU?%S DEL ?sLTIMO FILTRO -->
   <div class="linea-unica"></div>
 
   <div class="categoria">Bolsas</div>
@@ -52,7 +52,7 @@
       <div class="ordenar-right">
         <span>Ordenar por:</span>
         <span class="az">A-Z</span>
-        <span class="arrow small">�O"</span>
+        <span class="arrow small">&#9662;</span>
       </div>
 
       <!-- ===== GRID PRODUCTOS ===== -->
@@ -74,11 +74,28 @@
           <a class="title" [routerLink]="['/products', p.id]">
             {{ p.nombre }}
           </a>
+          <p class="excerpt" *ngIf="p.descripcionCorta">{{ p.descripcionCorta }}</p>
 
           <div class="price-row">
             <span class="price">{{ p.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
-            <button class="cart-btn" type="button">
-              <span class="cart-icon" aria-hidden="true">�Y>'</span>
+            <button class="cart-btn" type="button" (click)="addToCart(p, $event)">
+              <svg
+                class="cart-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M3 5h2l1.2 6.2a1 1 0 0 0 .98.8H17a1 1 0 0 0 .97-.76L20 8H7"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="10" cy="19" r="1.2" fill="currentColor"></circle>
+                <circle cx="17" cy="19" r="1.2" fill="currentColor"></circle>
+              </svg>
             </button>
           </div>
         </article>
@@ -88,3 +105,6 @@
 
   </div>
 </div>
+
+
+

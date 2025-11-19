@@ -11,7 +11,37 @@
         <div class="header-icons">
             <i class="fa-regular fa-user"></i>
             <i class="fa-regular fa-heart"></i>
-            <i class="fa-solid fa-cart-shopping" routerLink="/cart" style="cursor: pointer;"></i>
+
+            <div class="header-cart" (click)="toggleCart($event)">
+                <span class="cart-count" *ngIf="(cartCount$ | async) as count">{{ count }}</span>
+                <i class="fa-solid fa-cart-shopping"></i>
+            </div>
         </div>
+    </div>
+
+    <div class="cart-dropdown" *ngIf="cartOpen" (click)="$event.stopPropagation()">
+        <h4>Carrito</h4>
+        <ng-container *ngIf="(cartItems$ | async) as items; else emptyCart">
+            <div class="cart-item" *ngFor="let item of items">
+                <img [src]="item.imagen" [alt]="item.nombre">
+                <div class="cart-item-info">
+                    <p class="name">{{ item.nombre }}</p>
+                    <p class="sku" *ngIf="item.sku">SKU: {{ item.sku }}</p>
+                    <p class="qty">x{{ item.qty }} · {{ item.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+                </div>
+                <button class="remove" (click)="removeItem(item)">×</button>
+            </div>
+            <div class="cart-summary">
+                <span>Total:</span>
+                <strong>{{ (cartTotal$ | async) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+            </div>
+            <div class="cart-actions">
+                <button (click)="goToCart()">Ver carrito</button>
+                <button class="checkout" (click)="goToCheckout()">Ir a checkout</button>
+            </div>
+        </ng-container>
+        <ng-template #emptyCart>
+            <p class="empty">Tu carrito está vacío.</p>
+        </ng-template>
     </div>
 </header>

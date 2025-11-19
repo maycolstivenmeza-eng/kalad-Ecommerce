@@ -847,6 +847,8 @@ body.modal-open { overflow: hidden; }
   color: #fff;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  z-index: 2;
+  pointer-events: none;
 }
 
 .product-grid .img {
@@ -866,12 +868,18 @@ body.modal-open { overflow: hidden; }
 
 .product-grid .thumb:hover .img.primary {
   transform: scale(1.03);
-  opacity: 0;
 }
 
 .product-grid .thumb:hover .img.hover {
   opacity: 1;
   transform: scale(1.03);
+}
+
+.product-grid .product-card:hover .img {
+  opacity: 1;
+  filter: none;
+  transform: scale(1.01);
+  transition: transform 0.25s ease;
 }
 
 .product-grid .title {
@@ -881,6 +889,13 @@ body.modal-open { overflow: hidden; }
   text-decoration: none;
   font-size: 14px;
   line-height: 1.35;
+}
+
+.product-grid .excerpt {
+  margin: 0 12px 8px;
+  font-size: 13px;
+  color: #6b5d4b;
+  min-height: 36px;
 }
 
 .product-grid .price-row {
@@ -897,16 +912,22 @@ body.modal-open { overflow: hidden; }
 }
 
 .product-grid .cart-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  border: 1px solid #e6e1d9;
-  background: #fff;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid #e6e1d9;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
 
 .product-grid .cart-btn:hover {
-  border-color: #3b2c20;
+    border-color: #3b2c20;
+  }
+
+.product-grid .cart-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
 }
