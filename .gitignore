@@ -40,3 +40,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Credentials / service accounts (no subir llaves)
+*firebase-adminsdk*.json
+*service-account*.json
+*.secret.json
