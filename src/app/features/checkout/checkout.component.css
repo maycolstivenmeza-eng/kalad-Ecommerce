@@ -326,6 +326,97 @@
   margin: 0;
 }
 
+.suggestions {
+  margin: 18px 0 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.suggestions .eyebrow {
+  margin: 0 0 10px;
+  text-transform: none;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.suggestion-card {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: #faf8f4;
+}
+
+.suggestion-card img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.suggestion-card .title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.suggestion-card .meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.suggestion-card .price {
+  margin: 4px 0 0;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.suggestion-card .mini {
+  border: 1px solid var(--brand);
+  background: #fff;
+  color: var(--brand);
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.suggestion-card .mini:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+}
+
+.shipping-psych {
+  background: #fff7ef;
+  border: 1px solid #f0d5c1;
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.shipping-psych .label {
+  margin: 0;
+  font-weight: 700;
+  color: #b35428;
+}
+
+.shipping-psych .sub {
+  margin: 4px 0 8px;
+  font-style: italic;
+  color: #7a6a5c;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .checkout-content {

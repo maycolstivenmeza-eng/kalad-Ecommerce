@@ -77,7 +77,7 @@
   font-size: 12px;
   font-weight: 600;
   color: #fff;
-  text-transform: uppercase;
+  text-transform: none;
   margin-bottom: 10px;
 }
 .info .badge.out {

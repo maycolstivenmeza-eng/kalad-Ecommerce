@@ -175,7 +175,7 @@
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .status-APPROVED {

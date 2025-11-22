@@ -9,6 +9,9 @@
       <a routerLink="/contact" routerLinkActive="active">Contacto</a>
     </nav>
     <div class="header-icons">
+      <div class="header-search" (click)="toggleSearch($event)">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
       <div class="header-auth" (click)="toggleAuthMenu($event)">
         <i class="fa-regular fa-user"></i>
       </div>
@@ -28,6 +31,41 @@
     </div>
   </div>
 
+  <div class="search-layer" *ngIf="showSearch" (click)="$event.stopPropagation()">
+    <div class="search-card">
+      <div class="search-input">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          placeholder="Buscar piezas, colecciones o colores..."
+          [value]="searchTerm"
+          (input)="onSearchChange($any($event.target).value)"
+          autofocus
+        />
+        <button class="close" (click)="showSearch = false">&times;</button>
+      </div>
+
+      <div class="search-results" *ngIf="!searchLoading; else loadingSearch">
+        <ng-container *ngIf="searchResults.length; else emptyResults">
+          <div class="result" *ngFor="let prod of searchResults" (click)="goToSearchResult(prod.id)">
+            <img [src]="prod.imagen" [alt]="prod.nombre" />
+            <div class="info">
+              <p class="title">{{ prod.nombre }}</p>
+              <p class="meta">{{ prod.coleccion }} · {{ prod.categoria }}</p>
+            </div>
+            <span class="price">{{ prod.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+        </ng-container>
+        <ng-template #emptyResults>
+          <p class="empty">Sin resultados para "{{ searchTerm }}".</p>
+        </ng-template>
+      </div>
+      <ng-template #loadingSearch>
+        <p class="loading"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</p>
+      </ng-template>
+    </div>
+  </div>
+
   <div class="cart-dropdown" *ngIf="cartOpen" (click)="$event.stopPropagation()">
     <h4>Carrito</h4>
     <ng-container *ngIf="(cartItems$ | async) as items; else emptyCart">
@@ -38,7 +76,7 @@
           <p class="sku" *ngIf="item.sku">SKU: {{ item.sku }}</p>
           <p class="qty">x{{ item.qty }} · {{ item.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
         </div>
-        <button class="remove" (click)="removeItem(item)">✕</button>
+        <button class="remove" (click)="removeItem(item)">×</button>
       </div>
       <div class="cart-summary">
         <span>Total:</span>
@@ -46,7 +84,7 @@
       </div>
       <div class="cart-actions">
         <button (click)="goToCart()">Ver carrito</button>
-        <button class="checkout" (click)="goToCheckout()">Ir a checkout</button>
+        <button class="checkout" (click)="goToCheckout()">Comprar ahora</button>
       </div>
     </ng-container>
     <ng-template #emptyCart>
@@ -54,7 +92,7 @@
     </ng-template>
   </div>
 
-      <div class="fav-dropdown" *ngIf="favoritesOpen" (click)="$event.stopPropagation()">
+  <div class="fav-dropdown" *ngIf="favoritesOpen" (click)="$event.stopPropagation()">
     <h4>Favoritos</h4>
     <ng-container *ngIf="(favorites$ | async) as favs; else emptyFavs">
       <div class="fav-item" *ngFor="let prod of favs">
@@ -63,7 +101,7 @@
           <p class="name">{{ prod.nombre }}</p>
           <p class="price">{{ prod.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
         </div>
-        <button class="remove" (click)="removeFavorite(prod.id)">✕</button>
+        <button class="remove" (click)="removeFavorite(prod.id)">×</button>
       </div>
       <div class="fav-actions">
         <button (click)="favoritesOpen = false">Cerrar</button>
@@ -90,3 +128,47 @@
   </div>
 </header>
 
+<button class="floating-cart" (click)="toggleCartDrawer($event)">
+  <div class="pill">
+    <span class="label">Carrito</span>
+    <strong>{{ (cartTotal$ | async) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+    <span class="bubble" *ngIf="cartCount$ | async as count">{{ count }}</span>
+  </div>
+</button>
+
+<div class="cart-drawer" [class.open]="cartDrawerOpen" (click)="$event.stopPropagation()">
+  <div class="drawer-header">
+    <div>
+      <p class="eyebrow">Tu selección</p>
+      <h4>Carrito rápido</h4>
+    </div>
+    <button class="close" (click)="cartDrawerOpen=false">&times;</button>
+  </div>
+  <ng-container *ngIf="(cartItems$ | async) as items; else drawerEmpty">
+    <div class="drawer-list">
+      <div class="drawer-item" *ngFor="let item of items">
+        <img [src]="item.imagen" [alt]="item.nombre">
+        <div class="info">
+          <p class="title">{{ item.nombre }}</p>
+          <p class="meta">x{{ item.qty }} · {{ item.precio | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+        </div>
+        <button class="remove" (click)="removeItem(item)">×</button>
+      </div>
+    </div>
+      <div class="drawer-footer">
+        <div class="totals">
+          <span>Total estimado</span>
+          <strong>{{ calcTotal(items) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+        <div class="actions">
+          <button class="ghost" (click)="goToCart()">Ver carrito</button>
+          <button class="primary" (click)="goToCheckout()">Comprar ahora</button>
+        </div>
+    </div>
+  </ng-container>
+  <ng-template #drawerEmpty>
+    <p class="drawer-empty">Tu carrito está vacío.</p>
+  </ng-template>
+</div>
+
+<div class="drawer-backdrop" *ngIf="cartDrawerOpen" (click)="cartDrawerOpen=false"></div>

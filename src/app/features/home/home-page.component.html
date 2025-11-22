@@ -1,149 +1,126 @@
 <section class="kalad-hero">
-    <div class="hero-overlay">
-        <h1>KALAD ORIGEN</h1>
-        <p>El origen de una nueva elegancia.</p>
-        <button class="btn-hero" id="btn-hero">EXPLORAR COLECCIÓN</button>
-    </div>
+  <div class="hero-overlay">
+    <h1>KALAD ORIGEN</h1>
+    <p>El origen de una nueva elegancia.</p>
+    <button class="btn-hero" id="btn-hero">EXPLORAR COLECCION</button>
+  </div>
 </section>
 
 <section class="catalogo">
-    <h2 class="catalogo-frase"><em>"La elegancia tiene forma. Se llama KALAD."</em></h2>
-    <div class="section-divider">
-        <hr>
-        <span><i class="fas fa-fire"></i> Lo más vendido</span>
-        <hr>
+  <h2 class="catalogo-frase"><em>"La elegancia tiene forma. Se llama KALAD."</em></h2>
+  <div class="section-divider">
+    <hr>
+    <span><i class="fas fa-fire"></i> Lo mas vendido</span>
+    <hr>
+  </div>
+
+  <ng-container *ngIf="loading; else destacados">
+    <div style="text-align: center; padding: 40px; color: #666;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px;"></i>
+      <p style="margin-top: 10px;">Cargando productos...</p>
     </div>
+  </ng-container>
 
-    @if (loading) {
-        <div style="text-align: center; padding: 40px; color: #666;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size: 32px;"></i>
-            <p style="margin-top: 10px;">Cargando productos...</p>
-        </div>
-    } @else if (featuredProducts.length > 0) {
-        <div class="product-grid">
-            @for (product of featuredProducts; track product.id) {
-                <article class="product-card" [attr.data-id]="product.id">
-                    <a class="thumb" [routerLink]="['/products', product.id]">
-                        <span class="badge" *ngIf="product.badge" [ngClass]="product.badge">
-                            {{ product.badge }}
-                        </span>
-                        <span class="badge out" *ngIf="(product.stock ?? 0) <= 0">Sin stock</span>
-                        <img
-                          class="img primary"
-                          [src]="resolveImage(product)"
-                          [alt]="product.nombre"
-                          (load)="onImageLoad(product.id)"
-                          (error)="onImageError(product.id, $event)"
-                        />
-                        <img
-                          class="img hover"
-                          *ngIf="product.imagenes && product.imagenes.length > 0"
-                          [src]="product.imagenes[0]"
-                          [alt]="product.nombre"
-                        />
-                        <button
-                          class="fav-btn"
-                          type="button"
-                          [class.active]="favorites.isFavorite(product.id)"
-                          (click)="toggleFavorite(product, $event)">
-                          <i class="fa-solid" [ngClass]="favorites.isFavorite(product.id) ? 'fa-heart' : 'fa-heart-circle-plus'"></i>
-                        </button>
-                    </a>
+  <ng-template #destacados>
+    <ng-container *ngIf="featuredProducts.length > 0; else sinDestacados">
+      <div class="product-grid">
+        <article class="product-card" [attr.data-id]="product.id" *ngFor="let product of featuredProducts; trackBy: trackById">
+          <a class="thumb" [routerLink]="['/products', product.id]">
+            <span class="badge" *ngIf="product.badge" [ngClass]="product.badge">
+              {{ product.badge }}
+            </span>
+            <span class="badge out" *ngIf="(product.stock || 0) <= 0">Sin stock</span>
+            <img
+              class="img primary"
+              [src]="resolveImage(product)"
+              [alt]="product.nombre"
+              (load)="onImageLoad(product.id)"
+              (error)="onImageError(product.id, $event)"
+            />
+            <img
+              class="img hover"
+              *ngIf="product.imagenes && product.imagenes.length > 0"
+              [src]="product.imagenes[0]"
+              [alt]="product.nombre"
+            />
+            <button
+              class="fav-btn"
+              type="button"
+              [class.active]="favorites.isFavorite(product.id)"
+              (click)="toggleFavorite(product, $event)">
+              <i class="fa-solid" [ngClass]="favorites.isFavorite(product.id) ? 'fa-heart' : 'fa-heart-circle-plus'"></i>
+            </button>
+          </a>
 
-                    <a class="title" [routerLink]="['/products', product.id]">
-                        {{ product.nombre }}
-                    </a>
-                    <p class="excerpt" *ngIf="product.descripcionCorta">{{ product.descripcionCorta }}</p>
+          <a class="title" [routerLink]="['/products', product.id]">
+            {{ product.nombre }}
+          </a>
+          <p class="excerpt" *ngIf="product.descripcionCorta">{{ product.descripcionCorta }}</p>
 
-                    <div class="price-row">
-                        <span class="price">{{ formatPrice(product.precio) }}</span>
-                        <button
-                          class="cart-btn"
-                          type="button"
-                          (click)="addToCart(product, $event)"
-                          [disabled]="(product.stock || 0) <= 0"
-                        >
-                          <svg
-                            class="cart-icon"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                            focusable="false"
-                          >
-                            <path
-                              d="M3 5h2l1.2 6.2a1 1 0 0 0 .98.8H17a1 1 0 0 0 .97-.76L20 8H7"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="1.5"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            />
-                            <circle cx="10" cy="19" r="1.2" fill="currentColor"></circle>
-                            <circle cx="17" cy="19" r="1.2" fill="currentColor"></circle>
-                          </svg>
-                        </button>
-                    </div>
-                </article>
-            }
-        </div>
-    } @else {
-        <div style="text-align: center; padding: 40px; color: #666;">
-            <p>No hay productos destacados disponibles.</p>
-            <a routerLink="/products" style="color: #333; text-decoration: underline;">Ver todos los productos</a>
-        </div>
-    }
+          <div class="price-row">
+            <span class="price">{{ formatPrice(product.precio) }}</span>
+            <button
+              class="cart-btn"
+              type="button"
+              (click)="addToCart(product, $event)"
+              [disabled]="(product.stock || 0) <= 0"
+            >
+              <svg
+                class="cart-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path
+                  d="M3 5h2l1.2 6.2a1 1 0 0 0 .98.8H17a1 1 0 0 0 .97-.76L20 8H7"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="10" cy="19" r="1.2" fill="currentColor"></circle>
+                <circle cx="17" cy="19" r="1.2" fill="currentColor"></circle>
+              </svg>
+            </button>
+          </div>
+        </article>
+      </div>
+    </ng-container>
+    <ng-template #sinDestacados>
+      <div style="text-align: center; padding: 40px; color: #666;">
+        <p>No hay productos destacados disponibles.</p>
+        <a routerLink="/products" style="color: #333; text-decoration: underline;">Ver todos los productos</a>
+      </div>
+    </ng-template>
+  </ng-template>
 </section>
 
 <section class="historia-section">
-    <img src="/assets/images/historia.png" alt="Historia" class="historia-imagen">
-    <div class="historia-texto">
-        <h2>HISTORIA</h2>
-        <p>
-            Mochilas tejidas con identidad, diseñadas para mujeres, hombres y jóvenes que valoran el estilo, la calidad
-            y la historia.
-        </p>
-        <button id="btnConocerMas">CONOCER MÁS</button>
-    </div>
+  <img src="/assets/images/historia.png" alt="Historia" class="historia-imagen">
+  <div class="historia-texto">
+    <h2>HISTORIA</h2>
+    <p>
+      Mochilas tejidas con identidad, disenadas para mujeres, hombres y jovenes que valoran el estilo, la calidad
+      y la historia.
+    </p>
+    <button id="btnConocerMas">CONOCER MAS</button>
+  </div>
 </section>
 
 <section class="raices-section">
-    <h2>Explora nuestras raíces</h2>
-    <div class="raices-grid">
-        <div class="raiz-item">
-            <img src="/assets/images/Producto_1.jpg" alt="KALAD ORIGEN" class="img-kalad-aire" />
-            <h3>KALAD ORIGEN</h3>
-            <a routerLink="/collections" class="link">Explorar colección <span>→</span></a>
-        </div>
-
-        <div class="raiz-item">
-            <img src="/assets/images/KALAD-ORIGEN.jpeg" alt="KALAD ESSENCIA" class="img-kalad-origen" />
-            <h3>KALAD ESSENCIA</h3>
-            <a routerLink="/collections" class="link">Explorar colección <span>→</span></a>
-        </div>
-
+  <h2>Explora nuestras raices</h2>
+  <div class="raices-grid">
+    <div class="raiz-item">
+      <img src="/assets/images/Producto_1.jpg" alt="KALAD ORIGEN" class="img-kalad-aire" />
+      <h3>KALAD ORIGEN</h3>
+      <a routerLink="/collections" class="link">Explorar coleccion <span>»</span></a>
     </div>
-</section>
 
-<section class="testimonios-section">
-    <div class="contenido-central">
-        <h2>Ellos ya llevan nuestra tradición</h2>
-        <div class="testimonios-container">
-            <div class="testimonio">
-                “Cada vez que uso mi mochila Kalad Origen, siento que llevo un pedazo de historia conmigo. La calidad es
-                impresionante.”
-                <strong>— Laura M.</strong>
-            </div>
-            <div class="testimonio">
-                “Me encanta saber que estoy apoyando a artesanos locales. Las piezas son hermosas y únicas.”
-                <strong>— Santiago R.</strong>
-            </div>
-            <div class="testimonio">
-                “No es solo un producto, es una conexión con mis raíces. Definitivamente compraré de nuevo.”
-                <strong>— Valeria C.</strong>
-            </div>
-        </div>
+    <div class="raiz-item">
+      <img src="/assets/images/KALAD-ORIGEN.jpeg" alt="KALAD ESSENCIA" class="img-kalad-origen" />
+      <h3>KALAD ESSENCIA</h3>
+      <a routerLink="/collections" class="link">Explorar coleccion <span>»</span></a>
     </div>
+  </div>
 </section>
-
-
-
-

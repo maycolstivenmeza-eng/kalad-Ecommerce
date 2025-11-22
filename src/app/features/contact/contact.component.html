@@ -1,47 +1,48 @@
-﻿<div class="contact-page">
-
-  <!-- Breadcrumb -->
+<div class="contact-page">
   <div class="breadcrumb">Inicio / Contacto</div>
 
-  <!-- Banner -->
   <div class="banner">
-    <h1>Contáctanos</h1>
-    <p>Estamos aquí para escucharte y ayudarte.</p>
+    <h1>Contactanos</h1>
+    <p>Estamos aqui para escucharte y ayudarte.</p>
   </div>
 
- 
-
-  <!-- Formulario -->
   <section class="formulario">
-    
-
     <label>Nombre</label>
-    <input type="text"  placeholder="Tu Nombre" />
+    <input type="text" [(ngModel)]="nombre" name="nombre" placeholder="Tu Nombre" />
 
     <label>Correo</label>
-    <input type="email" placeholder="Tu Correo Electrónico" />
+    <input type="email" [(ngModel)]="correo" name="correo" placeholder="Tu Correo Electronico" />
+
+    <label>Motivo</label>
+    <select [(ngModel)]="motivo" name="motivo">
+      <option value="contacto">Contacto general</option>
+      <option value="ventas">Ventas</option>
+      <option value="soporte">Soporte</option>
+      <option value="info">Informacion</option>
+      <option value="hola">Hola</option>
+      <option value="no-reply">No reply</option>
+    </select>
 
     <label>Asunto</label>
-    <input type="text" placeholder="Asunto" />
+    <input type="text" [(ngModel)]="asunto" name="asunto" placeholder="Asunto" />
 
     <label>Mensaje</label>
-    <textarea placeholder="Tu Mensaje"></textarea>
+    <textarea [(ngModel)]="mensaje" name="mensaje" placeholder="Tu Mensaje"></textarea>
 
-    <button (click)="enviar()">Enviar</button>
+    <button [disabled]="sending" (click)="enviar()">
+      {{ sending ? 'Enviando...' : 'Enviar' }}
+    </button>
   </section>
 
- <!-- Información de contacto -->
   <section class="info">
-  
-    <h2>Información de contacto</h2>
-    <div class="info-item"><span>Correo:</span> kalad&#64;gmail.com</div>
-    <div class="info-item"><span>Teléfono:</span> +57 3233333333</div>
-    <div class="info-item"><span>Horarios:</span> Lunes a sábado, 9:00 AM - 6:00 PM</div>
+    <h2>Informacion de contacto</h2>
+    <div class="info-item"><span>Correo:</span> contacto&#64;kalad.com.co</div>
+    <div class="info-item"><span>Telefono:</span> +57 3233333333</div>
+    <div class="info-item"><span>Horarios:</span> Lunes a sabado, 9:00 AM - 6:00 PM</div>
   </section>
 
-  <!--redes sociales -->
-<section class="redes">
-    <h2>Síguenos en nuestras redes sociales</h2>
+  <section class="redes">
+    <h2>Siguenos en nuestras redes sociales</h2>
     <div class="icons">
       <a href="https://facebook.com/kalad" target="_blank" aria-label="Facebook">
         <i class="fab fa-facebook-f"></i>
@@ -57,5 +58,4 @@
       </a>
     </div>
   </section>
-
 </div>

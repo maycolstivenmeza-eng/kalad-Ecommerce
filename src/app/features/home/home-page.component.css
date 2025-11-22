@@ -53,7 +53,7 @@ body {
 
 /* === HERO SECTION === */
 .kalad-hero {
-  background-image: url('/assets/images/Baner_index.png');
+  background-image: url('/assets/images/Baner_index.webp');
   background-size: cover;
   background-position: center;
   height: 420px;
@@ -845,7 +845,7 @@ body.modal-open { overflow: hidden; }
   font-size: 11px;
   font-weight: 600;
   color: #fff;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   z-index: 2;
   pointer-events: none;

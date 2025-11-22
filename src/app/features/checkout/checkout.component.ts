@@ -8,11 +8,12 @@ import { AuthService } from "../../shared/services/auth.service";
 import { PedidosService } from "../../shared/services/pedidos.service";
 import { UserDataService } from "../../shared/services/user-data.service";
 import { ProductService } from "../../shared/services/product.service";
-import { firstValueFrom } from "rxjs";
+import { firstValueFrom, take } from "rxjs";
 import { CouponService } from "../../shared/services/coupon.service";
 import { environment } from "../../../environments/environment";
 import { FormsModule } from "@angular/forms";
 import { AnalyticsService } from "../../shared/services/analytics.service";
+import { Product } from "../../shared/models/product.model";
 
 @Component({
   selector: "app-checkout",
@@ -28,6 +29,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
   couponCode = "";
   discount = 0;
   shipping = 0;
+  suggestions: Product[] = [];
   private purchaseTracked = false;
   private abandonTracked = false;
 
@@ -48,6 +50,7 @@ export class CheckoutComponent implements OnInit, OnDestroy {
     this.initializeForm();
     this.cartItems = this.cartService.items;
     this.computeShipping(this.getSubtotal());
+    this.loadSuggestions();
   }
 
   ngOnDestroy(): void {
@@ -122,6 +125,25 @@ export class CheckoutComponent implements OnInit, OnDestroy {
 
   computeShipping(subtotal: number): void {
     this.shipping = subtotal >= 200000 || subtotal === 0 ? 0 : 12000;
+  }
+
+  private loadSuggestions(): void {
+    const baseCollection = this.cartItems[0]?.coleccion ?? null;
+    const source$ = baseCollection
+      ? this.productService.getProductsByCollection(baseCollection)
+      : this.productService.getFeaturedProducts();
+
+    source$.pipe(take(1)).subscribe((products) => {
+      this.suggestions = products
+        .filter((p) => !this.cartItems.some((item) => item.id === p.id))
+        .slice(0, 4);
+    });
+  }
+
+  addSuggested(product: Product) {
+    this.cartService.addProduct(product, 1);
+    this.cartItems = this.cartService.items;
+    this.computeShipping(this.getSubtotal());
   }
 
   async processPayment(): Promise<void> {

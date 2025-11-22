@@ -131,21 +131,5 @@
     </table>
   </section>
 
-  <!-- ===================== OPINIONES ====================== -->
-  <section class="reviews">
-    <h2>Opiniones de los Clientes</h2>
-
-    <div class="review" *ngFor="let r of reviews">
-      <p class="review-name">{{ r.name }}</p>
-      <p class="review-date">{{ r.date }}</p>
-
-      <div class="stars">
-        <span *ngFor="let s of stars; let i = index">
-          {{ i < r.rating ? '★' : '☆' }}
-        </span>
-      </div>
-
-      <p class="review-comment">{{ r.comment }}</p>
-    </div>
-  </section>
+  <!-- Opiniones desactivadas para lanzamiento -->
 

@@ -70,6 +70,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
   },
   {
+    path: 'policies',
+    loadComponent: () => import('./features/policies/policies.component').then(m => m.PoliciesComponent)
+  },
+  {
     path: 'account',
     loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent)
   },

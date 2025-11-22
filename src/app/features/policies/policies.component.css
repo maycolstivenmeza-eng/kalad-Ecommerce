@@ -1,0 +1,51 @@
+.policies {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 0 20px 40px;
+  font-family: "Quicksand", sans-serif;
+  color: #2f241b;
+}
+
+.policies header {
+  margin-bottom: 24px;
+}
+
+.policies h1 {
+  margin: 0 0 6px;
+  font-size: 32px;
+}
+
+.policies p {
+  margin: 0 0 12px;
+  color: #6b5a4b;
+}
+
+.policies article {
+  background: #fffdf9;
+  border: 1px solid #eee1d3;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.policies article h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.policies ul {
+  padding-left: 18px;
+  margin: 6px 0;
+  color: #4a3b30;
+}
+
+.policies li {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 768px) {
+  .policies {
+    padding: 0 12px 24px;
+  }
+}

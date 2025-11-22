@@ -78,6 +78,26 @@
   padding: 20px;
 }
 
+.shipping-psych {
+  background: #fff7ef;
+  border: 1px solid #f0d5c1;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.shipping-psych .label {
+  margin: 0;
+  font-weight: 700;
+  color: #b35428;
+}
+
+.shipping-psych .sub {
+  margin: 4px 0 8px;
+  font-style: italic;
+  color: #7a6a5c;
+}
+
 .btn-comprar {
   width: 100%;
   padding: 12px;

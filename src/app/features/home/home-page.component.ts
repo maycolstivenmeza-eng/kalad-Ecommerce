@@ -115,6 +115,10 @@ export class HomePageComponent implements OnInit {
     this.imageLoaded[productId] = true;
   }
 
+  trackById(_index: number, product: Product) {
+    return product.id;
+  }
+
   resolveImage(product: Product): string {
     return product.imagen && product.imagen.trim().length > 0
       ? product.imagen

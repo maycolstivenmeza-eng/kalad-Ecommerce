@@ -30,6 +30,10 @@
         <h3>Resumen</h3>
         <div class="linea"></div>
         <ng-container *ngIf="totalAmount$ | async as subtotal">
+          <div class="shipping-psych">
+            <p class="label">Envío fijo a todo Colombia por solo $12.000</p>
+            <p class="sub">Entrega rápida y segura</p>
+          </div>
           <div class="subtotal">
             <span>Productos ({{ totalItems$ | async }})</span>
             <strong>{{ subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
@@ -57,7 +61,7 @@
               <strong>{{ (subtotal + shipping - discount) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
             </div>
           </div>
-          <button class="btn-comprar" routerLink="/checkout">Ir a checkout</button>
+          <button class="btn-comprar" routerLink="/checkout">Comprar ahora</button>
         </ng-container>
       </aside>
     </div>

@@ -42,6 +42,11 @@ label {
   font-family: var(--font-secondary);
 }
 
+/* Breadcrumbs: mantener caso normal */
+.breadcrumb {
+  text-transform: none !important;
+}
+
 .section-divider {
   border-color: var(--color-neutral-line);
 }

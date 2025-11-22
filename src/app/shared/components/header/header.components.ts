@@ -6,6 +6,7 @@ import { Observable, firstValueFrom, map } from 'rxjs';
 import { FavoritesService } from '../../services/favorites.service';
 import { Product } from '../../models/product.model';
 import { AuthService } from '../../services/auth.service';
+import { ProductService } from '../../services/product.service';
 
 @Component({
   selector: 'app-header',
@@ -29,6 +30,12 @@ export class HeaderComponent {
   isLoggedIn$ = this.authService.isLoggedIn$;
 
   cartOpen = false;
+  cartDrawerOpen = false;
+  showSearch = false;
+  searchTerm = '';
+  searchLoading = false;
+  searchResults: Product[] = [];
+  allProducts: Product[] = [];
   favoritesOpen = false;
   authMenuOpen = false;
 
@@ -36,7 +43,8 @@ export class HeaderComponent {
     private cartService: CartService,
     private favoritesService: FavoritesService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private productService: ProductService
   ) {}
 
   toggleCart(event: Event) {
@@ -44,7 +52,9 @@ export class HeaderComponent {
     this.cartOpen = !this.cartOpen;
     if (this.cartOpen) {
       this.favoritesOpen = false;
+      this.cartDrawerOpen = false;
       this.authMenuOpen = false;
+      this.showSearch = false;
     }
   }
 
@@ -53,7 +63,9 @@ export class HeaderComponent {
     this.favoritesOpen = !this.favoritesOpen;
     if (this.favoritesOpen) {
       this.cartOpen = false;
+      this.cartDrawerOpen = false;
       this.authMenuOpen = false;
+      this.showSearch = false;
     }
   }
 
@@ -62,27 +74,33 @@ export class HeaderComponent {
     this.authMenuOpen = !this.authMenuOpen;
     if (this.authMenuOpen) {
       this.cartOpen = false;
+      this.cartDrawerOpen = false;
       this.favoritesOpen = false;
+      this.showSearch = false;
     }
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.header-cart') && !target.closest('.header-fav') && !target.closest('.header-auth')) {
+    if (!target.closest('.header-cart') && !target.closest('.header-fav') && !target.closest('.header-auth') && !target.closest('.search-layer') && !target.closest('.floating-cart')) {
       this.cartOpen = false;
+      this.cartDrawerOpen = false;
       this.favoritesOpen = false;
       this.authMenuOpen = false;
+      this.showSearch = false;
     }
   }
 
   goToCart() {
     this.cartOpen = false;
+    this.cartDrawerOpen = false;
     this.router.navigate(['/cart']);
   }
 
   async goToCheckout() {
     this.cartOpen = false;
+    this.cartDrawerOpen = false;
     const logged = await this.ensureLoggedIn();
     if (!logged) return;
     this.router.navigate(['/checkout']);
@@ -102,6 +120,77 @@ export class HeaderComponent {
     if (!id) return;
     this.favoritesOpen = false;
     this.router.navigate(['/products', id]);
+  }
+
+  toggleSearch(event: Event) {
+    event.stopPropagation();
+    this.showSearch = !this.showSearch;
+    if (this.showSearch && !this.allProducts.length) {
+      this.loadProductsForSearch();
+    }
+  }
+
+  private loadProductsForSearch() {
+    this.searchLoading = true;
+    this.productService.getAllProducts().subscribe({
+      next: (prods) => {
+        this.allProducts = prods;
+        this.searchLoading = false;
+        this.filterSearch();
+      },
+      error: () => {
+        this.searchLoading = false;
+      }
+    });
+  }
+
+  onSearchChange(term: string) {
+    this.searchTerm = term;
+    this.filterSearch();
+  }
+
+  private filterSearch() {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) {
+      this.searchResults = this.allProducts.slice(0, 6);
+      return;
+    }
+
+    this.searchResults = this.allProducts
+      .filter((p) =>
+        [p.nombre, p.descripcion, p.coleccion, p.categoria]
+          .filter(Boolean)
+          .some((field) => field!.toLowerCase().includes(term))
+      )
+      .slice(0, 6);
+  }
+
+  goToSearchResult(productId: string) {
+    if (!productId) return;
+    this.showSearch = false;
+    this.searchTerm = '';
+    this.cartOpen = false;
+    this.cartDrawerOpen = false;
+    this.router.navigate(['/products', productId]);
+  }
+
+  toggleCartDrawer(event: Event) {
+    event.stopPropagation();
+    this.cartDrawerOpen = !this.cartDrawerOpen;
+    if (this.cartDrawerOpen) {
+      this.cartOpen = false;
+      this.favoritesOpen = false;
+      this.authMenuOpen = false;
+      this.showSearch = false;
+    }
+  }
+
+  calcTotal(items: CartItem[]): number {
+    return items.reduce((acc, item) => {
+      const qty = Number(item.qty) || 0;
+      const price = Number(item.precio) || 0;
+      return acc + qty * price;
+    }, 0);
   }
 
   private async ensureLoggedIn(): Promise<boolean> {

@@ -96,7 +96,7 @@
   color: white;
   font-size: 48px;
   font-family: "Playfair Display", serif;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 2px;
 }
 

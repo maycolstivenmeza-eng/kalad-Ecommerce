@@ -50,25 +50,6 @@ interface ThumbnailVariant {
 })
 
 export class DetailsProductsComponent implements OnInit, OnDestroy {
-toggleFavorite() {
-throw new Error('Method not implemented.');
-}
-inc() {
-throw new Error('Method not implemented.');
-}
-  qty: any;
-dec() {
-throw new Error('Method not implemented.');
-}
-colorSwatch(_t37: string) {
-throw new Error('Method not implemented.');
-}
-money(arg0: number) {
-throw new Error('Method not implemented.');
-}
-pickThumb(_t22: any) {
-throw new Error('Method not implemented.');
-}
   product?: Product;
   private viewTrackedId?: string;
   selectedImage: string = '';

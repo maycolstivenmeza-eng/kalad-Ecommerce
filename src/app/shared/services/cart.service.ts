@@ -80,7 +80,7 @@ export class CartService {
   updateQuantity(id: string, qty: number, color?: string) {
     const item = this.items.find((i) => i.id === id && i.color === color);
     if (!item) return;
-    const max = item.stock && item.stock > 0 ? item.stock : qty;
+    const max = item.stock && item.stock > 0 ? item.stock : Number.POSITIVE_INFINITY;
     item.qty = Math.min(Math.max(1, qty), max);
     this.persist();
   }

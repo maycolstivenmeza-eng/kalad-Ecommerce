@@ -234,6 +234,30 @@
         </div>
       </div>
 
+      <div class="shipping-psych">
+        <p class="label">Envío fijo a todo Colombia por solo $12.000</p>
+        <p class="sub">Entrega rápida y segura</p>
+      </div>
+
+      <div class="suggestions" *ngIf="suggestions.length">
+        <p class="eyebrow">Te puede interesar</p>
+        <div class="suggestion-list">
+          @for (prod of suggestions; track prod.id) {
+            <div class="suggestion-card">
+              <img [src]="prod.imagen" [alt]="prod.nombre">
+              <div class="info">
+                <p class="title">{{ prod.nombre }}</p>
+                <p class="meta">{{ prod.coleccion }} · {{ prod.categoria }}</p>
+                <p class="price">{{ formatPrice(prod.precio) }}</p>
+              </div>
+              <button type="button" class="mini" (click)="addSuggested(prod)">
+                Agregar
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
       <div class="security-badge">
         <i class="fas fa-lock"></i>
         <div>
