@@ -1,4 +1,4 @@
-﻿/* === RESET === */
+/* === RESET === */
 * {
   margin: 0;
   padding: 0;
@@ -53,56 +53,105 @@ body {
 
 /* === HERO SECTION === */
 .kalad-hero {
-  background-image: url('/assets/images/Baner_index.webp');
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.74) 40%, rgba(255, 255, 255, 0.28) 70%, rgba(255, 255, 255, 0) 100%),
+    url('/assets/images/Baner_index.webp');
   background-size: cover;
-  background-position: center;
-  height: 420px;
+  background-position: center right;
+  height: 520px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   position: relative;
-  padding-left: 60px;
+  padding: 80px 60px;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  overflow: hidden;
 }
 
 .hero-overlay {
-  color:#3B2C20;
-  max-width: 400px;
+  color: #3B2C20;
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(3px);
+  padding: 32px 34px;
+  border-left: 4px solid #3B2C20;
+  border-radius: 14px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 .hero-overlay h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 3.2rem;
-  margin-bottom: 12px;
+  font-size: clamp(2.4rem, 2.6vw + 1rem, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
 }
 
 .hero-overlay p {
   font-family: "Quicksand", sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 400;
-  margin-bottom: 24px;
+  margin-bottom: 26px;
+  color: #5c4728;
 }
 
 .btn-hero {
-  background-color: transparent;
+  background-color: #3B2C20;
   border: 2px solid #3B2C20;
-  color: #3B2C20;
-  padding: 12px 28px;
+  color: #fff;
+  padding: 14px 30px;
   font-family: "Quicksand", sans-serif;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  cursor: pointer;
 }
 
 .btn-hero:hover {
- background-color: #3B2C20;
-  color: #fff;
-  transition: all 0.3s ease;
+  background-color: #b85a3a;
+  border-color: #b85a3a;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
 }
 
-.btn-hero {
-  cursor: pointer; /* ðŸ‘ˆ Esto activa la manito */
+.btn-hero::after {
+  content: none;
+  font-size: 1rem;
 }
 
-.catalogo {
+@media (max-width: 1024px) {
+  .kalad-hero {
+    height: 480px;
+    padding: 70px 40px;
+    background-position: 70% center;
+  }
+
+  .hero-overlay {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 768px) {
+  .kalad-hero {
+    height: 440px;
+    padding: 60px 26px;
+    background-position: 65% center;
+  }
+
+  .hero-overlay {
+    padding: 26px 24px;
+    border-left-width: 3px;
+    max-width: 100%;
+  }
+}.catalogo {
   padding: 50px 20px;
   background-color: #ffffff;
   text-align: center;
@@ -136,7 +185,7 @@ body {
 }
 
 .section-divider i {
-  color: #cb5e30; /* fuego naranja cÃ¡lido */
+  color: #cb5e30; /* fuego naranja cálido */
   margin-right: 6px;
 }
 
@@ -217,14 +266,14 @@ body {
   opacity: 1;
 }
 
-/* Apagar el shimmer cuando la imagen estÃ¡ cargada */
+/* Apagar el shimmer cuando la imagen está cargada */
 .product-card img.loaded ~ .img-wrapper::before,
 .product-card img.loaded + .img-wrapper::before,
 .product-card .img-wrapper.loaded::before {
   display: none !important;
 }
 
-/* VersiÃ³n correcta: detectar que el contenedor tiene imagen cargada */
+/* Versión correcta: detectar que el contenedor tiene imagen cargada */
 .product-card .img-wrapper.loaded::before {
   display: none !important;
 }
@@ -252,7 +301,7 @@ body {
   background-color: #1E88E5;
 }
 
-/* TÃ­tulo del producto */
+/* Título del producto */
 .product-card h3 {
    font-family: "Playfair Display", serif;
   font-size: 1.1rem;         /* antes 0.9 o 1rem */
@@ -277,7 +326,7 @@ body {
   margin-top: 4px;
 }
 
-/* BotÃ³n carrito */
+/* Botón carrito */
 .product-card .btn-carrito {
   border: 1px solid #3b2c20;
   border-radius: 20px;
@@ -290,14 +339,14 @@ body {
 }
 
 .product-card .btn-carrito:hover {
-    background-color: #3b2c20;   /* cambia el fondo al cafÃ© de marca */
-  color: #fff;                 /* el Ã­cono o texto pasa a blanco */
+    background-color: #3b2c20;   /* cambia el fondo al café de marca */
+  color: #fff;                 /* el ícono o texto pasa a blanco */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
 }
 
 
-/* === SECCIÃ“N HISTORIA === */
+/* === SECCIÓN HISTORIA === */
 .historia-section {
   display: flex;
   align-items: center;
@@ -343,7 +392,7 @@ body {
 }
 
 .historia-section button {
-  background-color: #3B2C20; /* tono cafÃ© marca */
+  background-color: #3B2C20; /* tono café marca */
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -359,7 +408,7 @@ body {
   transform: translateY(-3px);
 }
 
-/* === SECCIÃ“N RAÃCES IGUAL A LA MAQUETA === */
+/* === SECCIÓN RAÍCES IGUAL A LA MAQUETA === */
 .raices-section {
   background-color: #f1ede5;
   padding: 80px 100px;
@@ -380,13 +429,13 @@ body {
   margin: 0 auto;
   display: flex;
   justify-content: center; /* centra horizontalmente */
-  gap: 60px; /* mÃ¡s espacio entre las dos tarjetas */
+  gap: 60px; /* más espacio entre las dos tarjetas */
   flex-wrap: wrap;
 }
 
 .raiz-item {
   flex: 1 1 calc(50% - 60px); /* antes 33.33% */
-  max-width: 400px; /* un poco mÃ¡s ancho para balancear visualmente */
+  max-width: 400px; /* un poco más ancho para balancear visualmente */
   display: flex;
   flex-direction: column;
   align-items: center; /* centramos contenido */
@@ -419,7 +468,7 @@ body {
 
 .raiz-item .link {
   font-family: "Quicksand", sans-serif;
-  color: #946037; /* tono dorado/marrÃ³n cÃ¡lido */
+  color: #946037; /* tono dorado/marrón cálido */
   font-size: 0.95rem;
   text-decoration: none;
   transition: color 0.3s ease;
@@ -445,7 +494,7 @@ body {
 
 .testimonios-container {
   display: flex;
-  justify-content: space-between; /* Cambiado para que se distribuya como las imÃ¡genes */
+  justify-content: space-between; /* Cambiado para que se distribuya como las imágenes */
   align-items: stretch;
   gap: 30px;
   max-width: 1140px; /* Igual que .raices-grid */
@@ -475,7 +524,7 @@ body {
 }
 
 
-/* ===== FOOTER - ya puedes tenerlo pero lo incluyo por si lo quieres en este archivo tambiÃ©n ===== */
+/* ===== FOOTER - ya puedes tenerlo pero lo incluyo por si lo quieres en este archivo también ===== */
 
 footer {
   background-color: #5D4524;
@@ -602,7 +651,7 @@ body.modal-open { overflow: hidden; }
   border-radius: 3px;
 }
 
-/* BotÃ³n cerrar (X) */
+/* Botón cerrar (X) */
 .cerrar {
   position: absolute;
   top: 10px;
@@ -617,7 +666,7 @@ body.modal-open { overflow: hidden; }
   color: #CB5E30;
 }
 
-/* === TÃ­tulo del modal === */
+/* === Título del modal === */
 .modal-contenido h2 {
   font-size: 20px;
   font-weight: 700;
@@ -666,7 +715,7 @@ body.modal-open { overflow: hidden; }
   color: #666;
 }
 
-/* === BOTÃ“N ELIMINAR PRODUCTO === */
+/* === BOTÓN ELIMINAR PRODUCTO === */
 .btn-eliminar {
   position: absolute;
   right: 0;
@@ -685,7 +734,7 @@ body.modal-open { overflow: hidden; }
   color: #A84D24;
 }
 
-/* === CUPÃ“N === */
+/* === CUPÓN === */
 .cupon {
   margin-top: 20px;
   border-top: 1px solid #eee;
@@ -751,7 +800,7 @@ body.modal-open { overflow: hidden; }
   color: #3b2c20;
 }
 
-/* === BOTÃ“N PAGAR === */
+/* === BOTÓN PAGAR === */
 .btn-pagar {
   width: 100%;
   margin-top: 20px;
@@ -779,7 +828,7 @@ body.modal-open { overflow: hidden; }
   }
 }
 
-/* AnimaciÃ³n de entrada */
+/* Animación de entrada */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -813,7 +862,7 @@ body.modal-open { overflow: hidden; }
 
 
 
-/* Ajuste: replicar dimensiones del catálogo principal */
+/* Ajuste: replicar dimensiones del cat�logo principal */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -962,3 +1011,6 @@ body.modal-open { overflow: hidden; }
   border-color: #c85c38;
   box-shadow: 0 10px 22px rgba(200, 92, 56, 0.25);
 }
+
+
+
